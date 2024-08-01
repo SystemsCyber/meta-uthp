@@ -13,7 +13,7 @@ function clone_and_checkout() {
     echo "Cloning and checking out layers..."
 
     # Clone and checkout poky
-    if [ ! -d "$FULL_YOCTO_DIR/" ]; then
+    if [ ! -d "$FULL_YOCTO_DIR/" ] || [ $yes_flag ]; then
         git clone git://git.yoctoproject.org/poky.git "$FULL_YOCTO_DIR/" || handle_error $LINENO
         cd "$FULL_YOCTO_DIR/" || handle_error $LINENO
         git checkout scarthgap || handle_error $LINENO
@@ -100,6 +100,8 @@ if [ -d "$YOCTO_DIR" ]; then
                 mkdir -p "$YOCTO_DIR" || handle_error $LINENO
                 FULL_YOCTO_DIR=$(cd "$YOCTO_DIR" && pwd) || handle_error $LINENO
                 echo "Directory created at $FULL_YOCTO_DIR."
+                # set yes flag to true
+                yes_flag=true
                 clone_and_checkout
                 break;;
             No ) 
@@ -124,5 +126,5 @@ cp "$FULL_YOCTO_DIR/meta-uthp/conf.samples/meta-jupyter-layer.conf.sample" "$FUL
 cp "$FULL_YOCTO_DIR/meta-uthp/conf.samples/local.conf.sample" "$FULL_YOCTO_DIR/build/conf/local.conf" || handle_error $LINENO
 cp "$FULL_YOCTO_DIR/meta-uthp/conf.samples/bblayers.conf.sample" "$FULL_YOCTO_DIR/build/conf/bblayers.conf" || handle_error $LINENO
 cp "$FULL_YOCTO_DIR/meta-uthp/conf.samples/conf-notes.txt" "$FULL_YOCTO_DIR/build/conf/conf-notes.txt" || handle_error $LINENO
-for file in "$FULL_YOCTO_DIR/build/conf/*"; do sed -i "s#\${FULL_YOCTO_DIR}#$(pwd)#g" "$file"; done
+for file in $FULL_YOCTO_DIR/build/conf/*; do sed -i "s#\${FULL_YOCTO_DIR}#$(pwd)#g" "$file"; done
 echo "Configuration files copied."

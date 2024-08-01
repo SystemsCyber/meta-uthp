@@ -11,7 +11,7 @@ BBLAYERS ?= " \
   ${FULL_YOCTO_DIR}/meta-yocto-bsp \
   ${FULL_YOCTO_DIR}/meta-openembedded/meta-oe \
   ${FULL_YOCTO_DIR}/meta-openembedded/meta-python \
-  ${FULL_YOCTO_DIR}/meta-python2
+  ${FULL_YOCTO_DIR}/meta-python2 \
   ${FULL_YOCTO_DIR}/meta-openembedded/meta-networking \
   ${FULL_YOCTO_DIR}/meta-jupyter \
   ${FULL_YOCTO_DIR}/meta-arm/meta-arm-toolchain \

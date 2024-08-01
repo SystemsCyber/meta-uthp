@@ -48,6 +48,6 @@ wget https://github.com/SystemsCyber/meta-uthp/raw/scarthgap/uthp-setup-dev-env.
 Run it:
 ```shell
 chmod +x uthp-setup-dev-env.sh
-sudo ./uthp-setup-dev-env.sh
+./uthp-setup-dev-env.sh
 ```
 ---

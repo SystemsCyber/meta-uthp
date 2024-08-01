@@ -6,17 +6,17 @@ BBPATH = "${TOPDIR}"
 BBFILES ?= ""
 
 BBLAYERS ?= " \
-  /storage/spencer/poky/meta \
-  /storage/spencer/poky/meta-poky \
-  /storage/spencer/poky/meta-yocto-bsp \
-  /storage/spencer/poky/meta-openembedded/meta-oe \
-  /storage/spencer/poky/meta-openembedded/meta-python \
-  /storage/spencer/UTHP/Yocto/meta-python2 \
-  /storage/spencer/poky/meta-openembedded/meta-networking \
-  /storage/spencer/poky/meta-openembedded/meta-jupyter \
-  /storage/spencer/poky/meta-arm/meta-arm-toolchain \
-  /storage/spencer/poky/meta-arm/meta-arm \
-  /storage/spencer/poky/meta-ti/meta-ti-bsp \
-  /storage/spencer/poky/meta-ti/meta-ti-extras \
-  /storage/spencer/UTHP/Yocto/meta-uthp \
+  ${FULL_YOCTO_DIR}/meta \
+  ${FULL_YOCTO_DIR}/meta-poky \
+  ${FULL_YOCTO_DIR}/meta-yocto-bsp \
+  ${FULL_YOCTO_DIR}/meta-openembedded/meta-oe \
+  ${FULL_YOCTO_DIR}/meta-openembedded/meta-python \
+  ${FULL_YOCTO_DIR}/meta-python2
+  ${FULL_YOCTO_DIR}/meta-openembedded/meta-networking \
+  ${FULL_YOCTO_DIR}/meta-jupyter \
+  ${FULL_YOCTO_DIR}/meta-arm/meta-arm-toolchain \
+  ${FULL_YOCTO_DIR}/meta-arm/meta-arm \
+  ${FULL_YOCTO_DIR}/meta-ti/meta-ti-bsp \
+  ${FULL_YOCTO_DIR}/meta-ti/meta-ti-extras \
+  ${FULL_YOCTO_DIR}/meta-uthp \
   "

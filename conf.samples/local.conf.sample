@@ -27,7 +27,7 @@ EXTRA_IMAGE_FEATURES += " package-management"
 # PACKAGE_ARCHS = "armhf"
 
 INHERIT += "ccache"
-CCACHE_DIR = "/storage/spencer/poky/ccache"
+CCACHE_DIR = "${FULL_YOCTO_DIR}/ccache"
 
 # PREFFERED_PROVIDER_virtual/kernel ?= "linux-bb.org_git" -- already set in beaglebone.conf
 # PREFFERED_VERSION_linux-yocto ?= "5.10%"

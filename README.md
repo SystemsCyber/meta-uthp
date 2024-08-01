@@ -43,7 +43,7 @@ cd ~/my-uthp-yocto
 ```
 Download the uthp-setup-dev-env.sh script:
 ```shell
-wget https://github.com/SystemsCyber/UTHP/tree/scarthgap/Yocto/meta-uthp/scripts/uthp-setup-dev-env.sh
+wget https://github.com/SystemsCyber/meta-uthp/raw/scarthgap/uthp-setup-dev-env.sh
 ```
 Run it:
 ```shell

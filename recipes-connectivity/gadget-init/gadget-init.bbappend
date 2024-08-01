@@ -1,3 +1,4 @@
+DESCRIPTION = "Network Gadget Init before Storage Gadget Init"
 FILESEXTRAPATHS:prepend := "${THISDIR}/${PN}:"
 
 SRC_URI:append = " file://network-gadget-init.service"

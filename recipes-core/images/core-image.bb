@@ -118,7 +118,7 @@ PYTHON3_TOOLS = " \
     python3-setuptools \
     python3-pip \
     python3-bitstring \
-    python3-jupyter \
+    python3-jupyterlab \
     python3-scapy \
     python3-can \
     python3-cantools \
@@ -127,8 +127,6 @@ PYTHON3_TOOLS = " \
     python3-canmatrix \
     python3-cmap \
     python3-future \
-    python3-pretty-j1939 \
-    python3-pretty-j1587 \
     python3-sae-j1939 \
     python3-jsonschema \
     python3-nest-asyncio \
@@ -137,12 +135,16 @@ PYTHON3_TOOLS = " \
     python3-termcolor \
     python3-attrs \
     python3-typing-extensions \
-    python3-py-hv-networks \
     python3-flask \
     python3-websockets \
     python3-dev \
     python3-asyncio-glib \
  "
+# TODO:
+# python3-pretty-j1939 
+# python3-pretty-j1587
+# plc4trucksduck
+# python3-py-hv-networks
 
 IMAGE_INSTALL += " \
     ${CAN_TOOLS} \

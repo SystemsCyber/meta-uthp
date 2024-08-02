@@ -19,10 +19,8 @@ CORE_OS = " \
     usbutils \
     gadget-init \
     safe-shutdown \
-    dtbo \
     locale-base-en-us \
     locale-base-en-gb \
-    uthp-extlinux \
  "
 
 KERNEL_EXTRA_INSTALL = " \
@@ -169,5 +167,10 @@ update_sudoers(){
     sed -i 's/# %sudo/%sudo/' ${IMAGE_ROOTFS}/etc/sudoers
 }
 
-ROOTFS_POSTPROCESS_COMMAND += "update_sudoers; "
+ROOTFS_POSTPROCESS_COMMAND += "update_sudoers"
 # kernel located in ..../poky/build/tmp/work/beaglebone-poky-linux-gnueabi/linux-bb.org/6.1.80+git/build/.config
+IMAGE_BOOT_PARTITION:append = " dtbo/*;extlinux/dtbo/"
+
+pkg_postinst_ontarget:${PN}(){
+    chown -R uthp:uthp ${IMAGE_ROOTFS}/home/uthp
+}

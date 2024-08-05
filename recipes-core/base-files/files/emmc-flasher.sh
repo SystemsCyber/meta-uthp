@@ -1,5 +1,4 @@
 #!/bin/bash
-# TODO: test this and edit as needed
 source='mmcblk0'
 destination='mmcblk1'
 
@@ -183,10 +182,13 @@ copy_partitions
 # 6. regenerate ssh keys
 echo "==> Regenerating SSH keys"
 regenerate_ssh_keys
-# 7. cleanup
+# 7. regenerate fstab
+echo "==> Regenerating fstab"
+sed -i "s/${source}/${destination}/g" /mnt/${destination}p2/etc/fstab
+# 8. cleanup
 echo "==> Cleaning up"
 cleanup
-# 8. stop leds
+# 9. stop leds
 kill $CYLON_PID > /dev/null 2>&1
 echo "==> eMMC Flashing Complete"
 echo "==> Please power off your device, remove the SD card, and power it back on"

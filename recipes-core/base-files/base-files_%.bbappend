@@ -3,6 +3,7 @@ SRC_URI += "file://init-uthp.sh \
             file://motd \
             file://fstab \
             file://.bashrc \
+            file://.bash_profile \
             file://emmc-flasher.sh"
 
 do_install:append() {
@@ -13,6 +14,8 @@ do_install:append() {
 
     install -d ${D}/home/uthp
     install -m 0644 ${WORKDIR}/.bashrc ${D}/home/uthp/.bashrc
-    
+    install -m 0644 ${WORKDIR}/.bash_profile ${D}/home/uthp/.bash_profile
+
+    install -d ${D}/opt/scripts
     install -m 0644 ${WORKDIR}/emmc-flasher.sh ${D}/opt/scripts/emmc-flasher.sh
 }

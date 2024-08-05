@@ -1,10 +1,9 @@
-SUMMARY = "UTHP Yocto Image Recipe"
+SUMMARY = "UTHP Core Image Recipe"
 
 IMAGE_INSTALL = "packagegroup-core-boot ${CORE_IMAGE_EXTRA_INSTALL}"
 LICENSE = "MIT"
 
 inherit core-image
-inherit extrausers
 
 GLIBC_GENERATE_LOCALES = "en_US.UTF-8"
 IMAGE_LINGUAS = "en-us"
@@ -21,6 +20,7 @@ CORE_OS = " \
     safe-shutdown \
     locale-base-en-us \
     locale-base-en-gb \
+    dtbo \
  "
 
 KERNEL_EXTRA_INSTALL = " \
@@ -57,6 +57,7 @@ EXTRA_TOOLS_INSTALL = " \
     bzip2 \
     devmem2 \
     dosfstools \
+    e2fsprogs \
     ethtool \
     findutils \
     i2c-tools \
@@ -117,6 +118,7 @@ PYTHON3_TOOLS = " \
     python3-pip \
     python3-bitstring \
     python3-jupyterlab \
+    python3-jupyter-server \
     python3-scapy \
     python3-can \
     python3-cantools \
@@ -154,23 +156,23 @@ IMAGE_INSTALL += " \
     ${PYTHON3_TOOLS} \
  "
 
-# Add uthp user and set 'temp' as password for root and uthp for dev
-EXTRA_USERS_PARAMS = "useradd uthp; \
+# Add uthp user and set temp password for root and uthp for dev
+inherit extrausers
+EXTRA_USERS_PARAMS = "useradd -s /bin/bash uthp; \
 	usermod -p '\$6\$kXDp5Q1Ki1mAOJ7U\$Bz7DjUHuRjnO/oPL6Xc3/TOiknek/eXiXIL8wiU00VpNJmd9dMayr6RvsY5Ip9DZ7Q9CAZEhFIKAgYRJf8ZgV0' uthp; \
     usermod -p '\$6\$kXDp5Q1Ki1mAOJ7U\$Bz7DjUHuRjnO/oPL6Xc3/TOiknek/eXiXIL8wiU00VpNJmd9dMayr6RvsY5Ip9DZ7Q9CAZEhFIKAgYRJf8ZgV0' root; \
     usermod -aG sudo uthp; \
+    usermod -s /bin/bash root; \
+    passwd-expire uthp; \
 	"
 
-# Here we give sudo access to sudo members
-# TODO: This is a security risk, we should remove this once in production
+update_owner(){
+    chown -R uthp:uthp ${IMAGE_ROOTFS}/home/uthp
+}
+
 update_sudoers(){
     sed -i 's/# %sudo/%sudo/' ${IMAGE_ROOTFS}/etc/sudoers
 }
 
-ROOTFS_POSTPROCESS_COMMAND += "update_sudoers"
-# kernel located in ..../poky/build/tmp/work/beaglebone-poky-linux-gnueabi/linux-bb.org/6.1.80+git/build/.config
-IMAGE_BOOT_PARTITION:append = " dtbo/*;extlinux/dtbo/"
-
-pkg_postinst_ontarget:${PN}(){
-    chown -R uthp:uthp ${IMAGE_ROOTFS}/home/uthp
-}
+ROOTFS_POSTPROCESS_COMMAND += "update_sudoers update_owner"
+KERNEL_DEVICETREE += "MCP251xFD-SPI.dts"

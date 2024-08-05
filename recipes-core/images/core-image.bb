@@ -20,7 +20,6 @@ CORE_OS = " \
     safe-shutdown \
     locale-base-en-us \
     locale-base-en-gb \
-    dtbo \
  "
 
 KERNEL_EXTRA_INSTALL = " \
@@ -164,15 +163,16 @@ EXTRA_USERS_PARAMS = "useradd -s /bin/bash uthp; \
     usermod -aG sudo uthp; \
     usermod -s /bin/bash root; \
     passwd-expire uthp; \
+    passwd-expire root; \
 	"
-
-update_owner(){
-    chown -R uthp:uthp ${IMAGE_ROOTFS}/home/uthp
-}
 
 update_sudoers(){
     sed -i 's/# %sudo/%sudo/' ${IMAGE_ROOTFS}/etc/sudoers
 }
 
-ROOTFS_POSTPROCESS_COMMAND += "update_sudoers update_owner"
-KERNEL_DEVICETREE += "MCP251xFD-SPI.dts"
+# fix this
+pkg_postinst_ontarget:${PN}() {
+    chown -R uthp:uthp ${IMAGE_ROOTFS}/home/uthp
+}
+
+ROOTFS_POSTPROCESS_COMMAND += "update_sudoers"

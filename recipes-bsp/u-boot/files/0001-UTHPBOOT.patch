@@ -1,0 +1,25 @@
+From c744d7a5740039ebbb620870bdadfda25cc7a7d3 Mon Sep 17 00:00:00 2001
+From: spenc3rb <beersc@colostate.edu>
+Date: Mon, 5 Aug 2024 15:46:51 -0600
+Subject: [PATCH] UTHPBOOT
+
+---
+ include/configs/am335x_evm.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/configs/am335x_evm.h b/include/configs/am335x_evm.h
+index 5b47778517..c90e7ed27d 100644
+--- a/include/configs/am335x_evm.h
++++ b/include/configs/am335x_evm.h
+@@ -81,7 +81,7 @@
+ #define CFG_EXTRA_ENV_SETTINGS \
+ 	DEFAULT_LINUX_BOOT_ENV \
+ 	"fdtfile=undefined\0" \
+-	"finduuid=part uuid mmc 0:2 uuid\0" \
++	"finduuid=part uuid mmc 0:2 uuid || part uuid mmc 1:2 uuid\0" \
+ 	"console=ttyO0,115200n8\0" \
+ 	"partitions=" \
+ 		"uuid_disk=${uuid_gpt_disk};" \
+-- 
+2.34.1
+

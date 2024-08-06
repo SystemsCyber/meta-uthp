@@ -13,7 +13,7 @@ IMAGE_ROOTFS_SIZE = "2797152"
 
 CORE_OS = " \
     openssh openssh-keygen openssh-sftp-server \
-    sudo \
+    sudo useradd-uthp \
     libgpiod libgpiod-tools libgpiod-dev \
     usbutils \
     gadget-init \
@@ -96,7 +96,7 @@ CAN_TOOLS = " \
     sigrok-cli \
     can2 \
     truckdevil \
-    canelloni \
+    cannelloni \
  "
 # deleted config-pin
 PREFERRED_VERSION_python = "2.7"
@@ -118,15 +118,12 @@ PYTHON3_TOOLS = " \
     python3-pip \
     python3-bitstring \
     python3-jupyterlab \
-    python3-jupyter-server \
-    python3-rpds-py \
     python3-scapy \
     python3-can \
     python3-cantools \
     python3-six \
     python3-cancat \
     python3-canmatrix \
-    python3-cmap \
     python3-future \
     python3-sae-j1939 \
     python3-jsonschema \
@@ -140,6 +137,7 @@ PYTHON3_TOOLS = " \
     python3-websockets \
     python3-dev \
     python3-asyncio-glib \
+    python3-dill \
  "
 # TODO:
 # python3-pretty-j1939 
@@ -157,24 +155,15 @@ IMAGE_INSTALL += " \
     ${PYTHON3_TOOLS} \
  "
 
-# Add uthp user and set temp password for root and uthp for dev
 inherit extrausers
-EXTRA_USERS_PARAMS = "useradd -s /bin/bash uthp; \
-	usermod -p '\$6\$kXDp5Q1Ki1mAOJ7U\$Bz7DjUHuRjnO/oPL6Xc3/TOiknek/eXiXIL8wiU00VpNJmd9dMayr6RvsY5Ip9DZ7Q9CAZEhFIKAgYRJf8ZgV0' uthp; \
-    usermod -p '\$6\$kXDp5Q1Ki1mAOJ7U\$Bz7DjUHuRjnO/oPL6Xc3/TOiknek/eXiXIL8wiU00VpNJmd9dMayr6RvsY5Ip9DZ7Q9CAZEhFIKAgYRJf8ZgV0' root; \
+EXTRA_USERS_PARAMS = " \
     usermod -aG sudo uthp; \
-    usermod -s /bin/bash root; \
-    passwd-expire uthp; \
-    passwd-expire root; \
+	passwd-expire uthp; \
+	passwd-expire root; \
 	"
 
 update_sudoers(){
     sed -i 's/# %sudo/%sudo/' ${IMAGE_ROOTFS}/etc/sudoers
-}
-
-# fix this
-pkg_postinst_ontarget:${PN}() {
-    chown -R uthp:uthp ${IMAGE_ROOTFS}/home/uthp
 }
 
 ROOTFS_POSTPROCESS_COMMAND += "update_sudoers"

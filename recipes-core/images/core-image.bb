@@ -96,6 +96,7 @@ CAN_TOOLS = " \
     sigrok-cli \
     can2 \
     truckdevil \
+    canelloni \
  "
 # deleted config-pin
 PREFERRED_VERSION_python = "2.7"
@@ -118,6 +119,7 @@ PYTHON3_TOOLS = " \
     python3-bitstring \
     python3-jupyterlab \
     python3-jupyter-server \
+    python3-rpds-py \
     python3-scapy \
     python3-can \
     python3-cantools \

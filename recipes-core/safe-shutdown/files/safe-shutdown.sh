@@ -8,6 +8,7 @@ read_i2c_status() {
 
 # Function to shutdown the system
 shutdown_system() {
+    echo "Safe shutdown script executed at $(date)" >> /var/log/safe-shutdown.log
     /sbin/shutdown now -h
 }
 

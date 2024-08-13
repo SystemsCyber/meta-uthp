@@ -41,5 +41,4 @@ initializeANSI()
 
 initializeANSI
 
-# make the machine green and everything else white based on export PS1='\h:\w\$ '
 export PS1="\[$greenf\]\h\[$reset\]:\[$greenfbright\]\w\[$reset\]\$ "

@@ -1,12 +1,13 @@
 SUMMARY = "UTHP Core Image Recipe"
-
-IMAGE_INSTALL = "packagegroup-core-boot ${CORE_IMAGE_EXTRA_INSTALL}"
+DESCRIPTION = "A core image recipe for the UTHP project"
 LICENSE = "MIT"
 
 inherit core-image
 
 GLIBC_GENERATE_LOCALES = "en_US.UTF-8"
 IMAGE_LINGUAS = "en-us"
+
+IMAGE_INSTALL = " packagegroup-core-boot ${CORE_IMAGE_EXTRA_INSTALL}"
 
 # The rootfs size is 2.7GB which is adjust dynamically by bitbake
 IMAGE_ROOTFS_SIZE = "2797152"
@@ -24,6 +25,7 @@ CORE_OS = " \
 
 KERNEL_EXTRA_INSTALL = " \
     kernel-modules \
+    kernel-devsrc \
  "
 # deleted vcan0
 
@@ -118,6 +120,8 @@ PYTHON3_TOOLS = " \
     python3-pip \
     python3-bitstring \
     python3-jupyterlab \
+    python3-rpds-py \
+    python3-psutil \
     python3-scapy \
     python3-can \
     python3-cantools \
@@ -159,6 +163,7 @@ inherit extrausers
 EXTRA_USERS_PARAMS = " \
     usermod -aG sudo uthp; \
 	passwd-expire uthp; \
+    usermod -s /bin/bash root; \
 	passwd-expire root; \
 	"
 

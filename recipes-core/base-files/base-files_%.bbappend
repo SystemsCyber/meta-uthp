@@ -3,6 +3,7 @@ SRC_URI += "file://init-uthp.sh \
             file://motd \
             file://fstab \
             file://.bashrc \
+            file://.bashrc-root \
             file://.bash_profile \
             file://emmc-flasher.sh \
             file://timesyncd.conf \
@@ -21,7 +22,7 @@ do_install:append() {
     install -m 0644 ${WORKDIR}/.bash_profile ${D}/home/uthp/.bash_profile
 
     # given that bash is the default shell, we need to install these files for root as well
-    install -m 0644 ${WORKDIR}/.bashrc ${D}/root/.bashrc
+    install -m 0644 ${WORKDIR}/.bashrc-root ${D}/root/.bashrc
     install -m 0644 ${WORKDIR}/.bash_profile ${D}/root/.bash_profile
 
     install -d ${D}/opt/scripts

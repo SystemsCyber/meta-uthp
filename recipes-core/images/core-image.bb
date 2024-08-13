@@ -17,7 +17,6 @@ CORE_OS = " \
     sudo useradd-uthp \
     libgpiod libgpiod-tools libgpiod-dev \
     usbutils \
-    gadget-init \
     safe-shutdown \
     locale-base-en-us \
     locale-base-en-gb \
@@ -160,10 +159,12 @@ IMAGE_INSTALL += " \
  "
 
 inherit extrausers
+PASS = '\$6\$kXDp5Q1Ki1mAOJ7U\$Bz7DjUHuRjnO/oPL6Xc3/TOiknek/eXiXIL8wiU00VpNJmd9dMayr6RvsY5Ip9DZ7Q9CAZEhFIKAgYRJf8ZgV0'
 EXTRA_USERS_PARAMS = " \
     usermod -aG sudo uthp; \
 	passwd-expire uthp; \
     usermod -s /bin/bash root; \
+    usermod -p ${PASS} root; \
 	passwd-expire root; \
 	"
 

@@ -1,5 +1,5 @@
 SUMMARY = "Useradd for UTHP"
-DESCRIPTION = "This recipe sets up users and groups for UTHP"
+DESCRIPTION = "Sets up users and groups for the UTHP"
 SECTION = "core"
 LICENSE = "CLOSED"
 
@@ -8,26 +8,18 @@ S = "${WORKDIR}"
 EXCLUDE_FROM_WORLD = "1"
 
 inherit useradd
-# You must set USERADD_PACKAGES when you inherit useradd. This
-# lists which output packages will include the user/group
-# creation code.
+
 USERADD_PACKAGES = "${PN}"
 
-USERADD_PARAM:${PN} = "\
-	-s /bin/bash -p '\$6\$kXDp5Q1Ki1mAOJ7U\$Bz7DjUHuRjnO/oPL6Xc3/TOiknek/eXiXIL8wiU00VpNJmd9dMayr6RvsY5Ip9DZ7Q9CAZEhFIKAgYRJf8ZgV0' -d /home/uthp uthp; \
-	-s /bin/bash -p '\$6\$kXDp5Q1Ki1mAOJ7U\$Bz7DjUHuRjnO/oPL6Xc3/TOiknek/eXiXIL8wiU00VpNJmd9dMayr6RvsY5Ip9DZ7Q9CAZEhFIKAgYRJf8ZgV0' root; \
-	"
+USERADD_PARAM:${PN} = "-s /bin/bash -p '\$6\$kXDp5Q1Ki1mAOJ7U\$Bz7DjUHuRjnO/oPL6Xc3/TOiknek/eXiXIL8wiU00VpNJmd9dMayr6RvsY5Ip9DZ7Q9CAZEhFIKAgYRJf8ZgV0' -g uthp -G uthp uthp"
+GROUPADD_PARAM:${PN} = "--system uthp"
 
 do_install () {
-	# install and modify home directory
-	install -d -m 755 ${D}/home/uthp
-	chown -R uthp ${D}/home/uthp
-	chgrp -R uthp ${D}/home/uthp
+    # Install and set permissions for the home directory
+    install -d -m 755 ${D}/home/uthp
+    chown -R uthp:uthp ${D}/home/uthp
 }
 
-FILES:${PN} = "*"
+FILES:${PN} = "/home/uthp"
 
-# Prevents do_package failures with:
-# debugsources.list: No such file or directory:
 INHIBIT_PACKAGE_DEBUG_SPLIT = "1"
-

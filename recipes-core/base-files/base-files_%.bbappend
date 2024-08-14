@@ -7,6 +7,7 @@ SRC_URI += "file://init-uthp.sh \
             file://.bash_profile \
             file://emmc-flasher.sh \
             file://timesyncd.conf \
+            file://J1939db.json \
             "
 
 do_install:append() {
@@ -31,4 +32,8 @@ do_install:append() {
     # need to test rtc with timesyncd
     install -d ${D}${sysconfdir}/systemd/timesyncd.conf.d
     install -m 0644 ${WORKDIR}/timesyncd.conf ${D}${sysconfdir}/systemd/timesyncd.conf.d/timesyncd-uthp.conf
+
+    # install the j1939 db
+    install -d ${D}${sysconfdir}/J1939
+    install -m 0644 ${WORKDIR}/J1939db.json ${D}${sysconfdir}/J1939/J1939db.json
 }

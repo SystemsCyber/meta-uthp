@@ -2,6 +2,8 @@ SUMMARY = "UTHP Core Image Recipe"
 DESCRIPTION = "A core image recipe for the UTHP project"
 LICENSE = "MIT"
 
+INHERIT += "cve-check"
+
 inherit core-image
 
 GLIBC_GENERATE_LOCALES = "en_US.UTF-8"
@@ -14,9 +16,9 @@ IMAGE_ROOTFS_SIZE = "2797152"
 
 CORE_OS = " \
     openssh openssh-keygen openssh-sftp-server \
-    sudo useradd-uthp \
+    sudo \
     libgpiod libgpiod-tools libgpiod-dev \
-    usbutils \
+    usbutils gadget-init \
     safe-shutdown \
     locale-base-en-us \
     locale-base-en-gb \
@@ -117,10 +119,7 @@ PYTHON3_TOOLS = " \
     python3-core \
     python3-setuptools \
     python3-pip \
-    python3-bitstring \
-    python3-jupyterlab \
-    python3-rpds-py \
-    python3-psutil \
+    packagegroup-python3-jupyter \
     python3-scapy \
     python3-can \
     python3-cantools \
@@ -130,23 +129,26 @@ PYTHON3_TOOLS = " \
     python3-future \
     python3-sae-j1939 \
     python3-jsonschema \
-    python3-nest-asyncio \
-    python3-numpy \
-    python3-pyserial \
     python3-termcolor \
     python3-attrs \
     python3-typing-extensions \
-    python3-flask \
-    python3-websockets \
     python3-dev \
     python3-asyncio-glib \
     python3-dill \
+    python3-pretty-j1939 \
+    python3-pretty-j1587 \
+    python3-py-hv-networks \
  "
 # TODO:
 # python3-pretty-j1939 
 # python3-pretty-j1587
 # plc4trucksduck
 # python3-py-hv-networks
+## jupyter lab
+# python3-rpds-py \ --> needs to be v0.2.0???
+# fix uthp user home directory
+# fix MCP251xFD-SPI.dts
+# actually add license files
 
 IMAGE_INSTALL += " \
     ${CAN_TOOLS} \
@@ -158,18 +160,19 @@ IMAGE_INSTALL += " \
     ${PYTHON3_TOOLS} \
  "
 
-inherit extrausers
-PASS = '\$6\$kXDp5Q1Ki1mAOJ7U\$Bz7DjUHuRjnO/oPL6Xc3/TOiknek/eXiXIL8wiU00VpNJmd9dMayr6RvsY5Ip9DZ7Q9CAZEhFIKAgYRJf8ZgV0'
-EXTRA_USERS_PARAMS = " \
-    usermod -aG sudo uthp; \
-	passwd-expire uthp; \
-    usermod -s /bin/bash root; \
-    usermod -p ${PASS} root; \
-	passwd-expire root; \
-	"
-
 update_sudoers(){
     sed -i 's/# %sudo/%sudo/' ${IMAGE_ROOTFS}/etc/sudoers
 }
 
-ROOTFS_POSTPROCESS_COMMAND += "update_sudoers"
+inherit extrausers
+PASS = '\$6\$kXDp5Q1Ki1mAOJ7U\$Bz7DjUHuRjnO/oPL6Xc3/TOiknek/eXiXIL8wiU00VpNJmd9dMayr6RvsY5Ip9DZ7Q9CAZEhFIKAgYRJf8ZgV0'
+EXTRA_USERS_PARAMS = " \
+    useradd -u 1000 -d /home/uthp -s /bin/bash -p '${PASS}' uthp; \
+    usermod -aG sudo uthp; \
+	passwd-expire uthp; \
+    usermod -s /bin/bash root; \
+    usermod -p '${PASS}' root; \
+	passwd-expire root; \
+	"
+
+ROOTFS_POSTPROCESS_COMMAND += "update_sudoers;"

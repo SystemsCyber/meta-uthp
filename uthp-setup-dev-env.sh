@@ -86,7 +86,6 @@ echo "Package installation completed."
 
 # 2. Have the user specify the directory where the Yocto project will be cloned
 echo "Creating Yocto directory..."
-Check if the directory already exists
 # 2. Have the user specify the directory where the Yocto project will be cloned
 echo "Creating Yocto directory..."
 # Check if the directory already exists
@@ -97,10 +96,6 @@ if [ -d "$YOCTO_DIR" ]; then
         case $yn in
             Yes ) 
                 rm -rf "$YOCTO_DIR" || handle_error $LINENO
-                mkdir -p "$YOCTO_DIR" || handle_error $LINENO
-                FULL_YOCTO_DIR=$(cd "$YOCTO_DIR" && pwd) || handle_error $LINENO
-                echo "Directory created at $FULL_YOCTO_DIR."
-                # set yes flag to true
                 yes_flag=true
                 clone_and_checkout
                 break;;
@@ -112,9 +107,7 @@ if [ -d "$YOCTO_DIR" ]; then
         esac
     done
 else
-    mkdir -p "$YOCTO_DIR" || handle_error $LINENO
-    FULL_YOCTO_DIR=$(cd "$YOCTO_DIR" && pwd) || handle_error $LINENO
-    echo "Directory created at $FULL_YOCTO_DIR."
+    yes_flag=true
     clone_and_checkout
 fi
 

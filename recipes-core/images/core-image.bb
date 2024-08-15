@@ -140,15 +140,16 @@ PYTHON3_TOOLS = " \
     python3-py-hv-networks \
  "
 # TODO:
-# python3-pretty-j1939 
-# python3-pretty-j1587
-# plc4trucksduck
+# python3-pretty-j1939 --> add json files
+# python3-pretty-j1587 --> add json files
+# plc4trucksduck --> Test the firmware on the Yocto distro
 # python3-py-hv-networks
 ## jupyter lab
 # python3-rpds-py \ --> needs to be v0.2.0???
 # fix uthp user home directory
 # fix MCP251xFD-SPI.dts
 # actually add license files
+# add cmap and build can-isotp into the kernel
 
 IMAGE_INSTALL += " \
     ${CAN_TOOLS} \

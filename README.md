@@ -59,5 +59,5 @@ Then you can build the uthp-image:
 bitbake core-image
 ```
 
-Any issues can be reported to the branch maintainer as of 8/16/2024: beersc@colostate.edu
+Any issues can be reported to the layer maintainer as of 8/16/2024: beersc@colostate.edu
 ---

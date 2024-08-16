@@ -50,4 +50,14 @@ Run it:
 chmod +x uthp-setup-dev-env.sh
 ./uthp-setup-dev-env.sh
 ```
+After it has run, you'll need to source oe-init-build-env:
+```shell
+source oe-init-build-env
+```
+Then you can build the uthp-image:
+```shell
+bitbake core-image
+```
+
+Any issues can be reported to the branch maintainer as of 8/16/2024: beersc@colostate.edu
 ---

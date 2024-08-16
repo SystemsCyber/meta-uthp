@@ -56,7 +56,7 @@ source Yocto/oe-init-build-env
 ```
 We use a custom patch so run this and wait for it to complete:
 ```shell
-devtool modify linux-bb.org
+devtool modify virtual/kernel
 ```
 Then you can build the image:
 ```shell

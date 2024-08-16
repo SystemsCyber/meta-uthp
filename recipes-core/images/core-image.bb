@@ -131,6 +131,7 @@ PYTHON3_TOOLS = " \
     python3-jsonschema \
     python3-termcolor \
     python3-attrs \
+    python3-pyserial \
     python3-typing-extensions \
     python3-dev \
     python3-asyncio-glib \

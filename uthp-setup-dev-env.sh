@@ -92,8 +92,8 @@ clone_and_checkout
 
 # Add the meta-uthp conf.samples to their respective directories
 echo -e "\n==>Copying layer configuration files from the meta-uthp repo...\n"
-source "$FULL_YOCTO_DIR/oe-init-build-env" || handle_error $LINENO
 cd "$FULL_YOCTO_DIR" || handle_error $LINENO
+source oe-init-build-env || handle_error $LINENO
 cp "$FULL_YOCTO_DIR/meta-uthp/conf.samples/meta-python2-layer.conf.sample" "$FULL_YOCTO_DIR/meta-python2/conf/layer.conf" || handle_error $LINENO
 cp "$FULL_YOCTO_DIR/meta-uthp/conf.samples/meta-jupyter-layer.conf.sample" "$FULL_YOCTO_DIR/meta-jupyter/conf/layer.conf" || handle_error $LINENO
 cp "$FULL_YOCTO_DIR/meta-uthp/conf.samples/local.conf.sample" "$FULL_YOCTO_DIR/build/conf/local.conf" || handle_error $LINENO

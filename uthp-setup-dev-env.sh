@@ -10,7 +10,7 @@ function handle_error() {
 
 # Helper functions for setting up the Yocto development environment
 function clone_and_checkout() {
-    echo "\n==> Cloning and checking out layers...\n"
+    echo -e "\n==> Cloning and checking out layers...\n"
 
     # Clone and checkout poky if the directory does not exist or the directory is empty
     if [ ! -d "$FULL_YOCTO_DIR/" ] || [ -z "$(ls -A $FULL_YOCTO_DIR/)" ]; then
@@ -79,18 +79,19 @@ function clone_and_checkout() {
     echo "Cloning and checking out completed. Now working on meta-jupyter and meta-python2."
 }
 
-echo "\n==>Installing necessary packages...\n"
+echo -e "\n==>Installing necessary packages...\n"
 # 1. setup build host
 sudo apt install -y gawk wget git diffstat unzip texinfo gcc build-essential chrpath socat cpio python3 python3-pip python3-pexpect xz-utils debianutils iputils-ping python3-git python3-jinja2 libegl1-mesa libsdl1.2-dev pylint xterm python3-subunit mesa-common-dev zstd liblz4-tool || handle_error $LINENO
-echo "\n==> Package installation completed.\n"
+echo -e "\n==> Package installation completed.\n"
 
 # 2. Clone the Yocto layers
+mkdir -p "$YOCTO_DIR" || handle_error $LINENO
 FULL_YOCTO_DIR=$(cd "$YOCTO_DIR" && pwd) || handle_error $LINENO
-echo "\n==> Yocto development directory located at: $FULL_YOCTO_DIR\n"
+echo -e "\n==> Yocto development directory located at: $FULL_YOCTO_DIR\n"
 clone_and_checkout
 
 # Add the meta-uthp conf.samples to their respective directories
-echo "Copying layer configuration files from the meta-uthp repo..."
+echo -e "\n==>Copying layer configuration files from the meta-uthp repo...\n"
 source "$FULL_YOCTO_DIR/oe-init-build-env" || handle_error $LINENO
 cp "$FULL_YOCTO_DIR/meta-uthp/conf.samples/meta-python2-layer.conf.sample" "$FULL_YOCTO_DIR/meta-python2/conf/layer.conf" || handle_error $LINENO
 cp "$FULL_YOCTO_DIR/meta-uthp/conf.samples/meta-jupyter-layer.conf.sample" "$FULL_YOCTO_DIR/meta-jupyter/conf/layer.conf" || handle_error $LINENO

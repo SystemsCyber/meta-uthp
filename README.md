@@ -38,8 +38,8 @@ The meta-uthp layer depends on the following layers:
 ## From scratch:
 
 ```shell
-mkdir ~/my-uthp-yocto
-cd ~/my-uthp-yocto
+mkdir <workspace>
+cd <workspace>
 ```
 Download the uthp-setup-dev-env.sh script:
 ```shell

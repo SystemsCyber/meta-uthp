@@ -50,7 +50,7 @@ Run it:
 chmod +x uthp-setup-dev-env.sh
 ./uthp-setup-dev-env.sh
 ```
-After it has run, you'll need to source oe-init-build-env:
+After it has run, you'll need to source oe-init-build-env EVERY TIME YOU OPEN A NEW TERMINAL:
 ```shell
 source Yocto/oe-init-build-env
 ```

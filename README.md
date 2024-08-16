@@ -54,6 +54,10 @@ After it has run, you'll need to source oe-init-build-env:
 ```shell
 source Yocto/oe-init-build-env
 ```
+We use a custom patch so run this and wait for it to complete:
+```shell
+devtool modify linux-bb.org
+```
 Then you can build the image:
 ```shell
 bitbake core-image

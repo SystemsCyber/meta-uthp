@@ -1,16 +1,18 @@
 #!/bin/bash
 
 YOCTO_DIR="Yocto"
+LOG_FILE="meta-uthp-setup.log"
 
-# Error handling function
+exec > >(tee -a "$LOG_FILE") 2>&1
+
+# Helper functions
 function handle_error() {
     echo "Error on line $1"
     exit 1
 }
 
-# Helper functions for setting up the Yocto development environment
 function clone_and_checkout() {
-    echo -e "\n==> Cloning and checking out layers...\n"
+    echo -e "\n==> Cloning and checking out layers... (please be patient as this takes some time)\n"
 
     # Clone and checkout poky if the directory does not exist or the directory is empty
     if [ ! -d "$FULL_YOCTO_DIR/" ] || [ -z "$(ls -A $FULL_YOCTO_DIR/)" ]; then
@@ -76,7 +78,6 @@ function clone_and_checkout() {
         echo "Directory $FULL_YOCTO_DIR/meta-uthp already exists, skipping clone."
     fi
 
-    echo "Cloning and checking out completed. Now working on meta-jupyter and meta-python2."
 }
 
 echo -e "\n==>Installing necessary packages...\n"

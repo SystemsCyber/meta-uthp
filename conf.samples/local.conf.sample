@@ -26,8 +26,10 @@ EXTRA_IMAGE_FEATURES += " package-management"
 # PACKAGE_FEED_BASE_PATHS = "bookworm"
 # PACKAGE_ARCHS = "armhf"
 
-INHERIT += "ccache"
-CCACHE_DIR = "${FULL_YOCTO_DIR}/ccache"
+# not stable
+# INHERIT += "ccache"
+# CCACHE_DIR = "/home/sbeer/storage/spencer/testing-dir/test-poky/workspace/Yocto/ccache"
+# end not stable (read the docs)
 
 # PREFFERED_PROVIDER_virtual/kernel ?= "linux-bb.org_git" -- already set in beaglebone.conf
 # PREFFERED_VERSION_linux-yocto ?= "5.10%"

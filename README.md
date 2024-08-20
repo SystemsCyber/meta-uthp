@@ -52,12 +52,14 @@ chmod +x uthp-setup-dev-env.sh
 ```
 After it has run, you'll need to source oe-init-build-env EVERY TIME YOU OPEN A NEW TERMINAL:
 ```shell
-source Yocto/oe-init-build-env
+source oe-init-build-env
 ```
 We use a custom patch so run this and wait for it to complete:
 ```shell
-devtool modify virtual/kernel
+devtool modify linux-bb.org/
+devtool finish --force-patch-refresh linux-bb.org meta-ti-bsp
 ```
+
 Then you can build the image:
 ```shell
 bitbake core-image

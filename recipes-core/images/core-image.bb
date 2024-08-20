@@ -27,6 +27,7 @@ CORE_OS = " \
 KERNEL_EXTRA_INSTALL = " \
     kernel-modules \
     kernel-devsrc \
+    uthp-devicetrees \
  "
 # deleted vcan0
 
@@ -141,16 +142,19 @@ PYTHON3_TOOLS = " \
     python3-py-hv-networks \
  "
 # TODO:
-# python3-pretty-j1939 --> add json files
-# python3-pretty-j1587 --> add json files
+## misc.
+# python3-pretty-j1939 --> add json files dynamically from our local storage
+# python3-pretty-j1587 --> add json files dynamically from our local storage
 # plc4trucksduck --> Test the firmware on the Yocto distro
 # python3-py-hv-networks
 ## jupyter lab
 # python3-rpds-py \ --> needs to be v0.2.0???
-# fix uthp user home directory
-# fix MCP251xFD-SPI.dts
-# actually add license files
+## core image
+# fix uthp user home directory (not chowned by uthp)
+# actually add license files to recipes to be compliant
+## kernel
 # add cmap and build can-isotp into the kernel
+
 
 IMAGE_INSTALL += " \
     ${CAN_TOOLS} \

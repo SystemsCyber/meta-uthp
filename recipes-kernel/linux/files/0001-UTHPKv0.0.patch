@@ -1,4 +1,4 @@
-From 3ceade2bb0d19698d03a2b3a07696e0607f0b96c Mon Sep 17 00:00:00 2001
+From 19edc023435262aec0eb5e141a0a19490b34fe85 Mon Sep 17 00:00:00 2001
 From: spenc3rb <beersc@colostate.edu>
 Date: Mon, 8 Jul 2024 08:37:10 -0600
 Subject: [PATCH] UTHPKv0.0
@@ -8,12 +8,12 @@ Subject: [PATCH] UTHPKv0.0
  1 file changed, 147 insertions(+)
 
 diff --git a/arch/arm/boot/dts/am335x-boneblack.dts b/arch/arm/boot/dts/am335x-boneblack.dts
-index 9312197316f0..23dc75219a5e 100644
+index ea205b720764..251ff5f2bbdd 100644
 --- a/arch/arm/boot/dts/am335x-boneblack.dts
 +++ b/arch/arm/boot/dts/am335x-boneblack.dts
-@@ -168,3 +168,150 @@ &gpio3 {
- 		"NC",
- 		"NC";
+@@ -178,3 +178,150 @@ &gpio3 {
+ &baseboard_eeprom {
+ 	vcc-supply = <&ldo4_reg>;
  };
 +
 +
@@ -163,6 +163,3 @@ index 9312197316f0..23dc75219a5e 100644
 +    status = "okay";
 +};
 \ No newline at end of file
--- 
-2.34.1
-

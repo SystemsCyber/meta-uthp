@@ -54,11 +54,6 @@ After it has run, you'll need to source oe-init-build-env EVERY TIME YOU OPEN A 
 ```shell
 source oe-init-build-env
 ```
-We use a custom patch so run this and wait for it to complete:
-```shell
-devtool modify linux-bb.org/
-devtool finish --force-patch-refresh linux-bb.org meta-ti-bsp
-```
 
 Then you can build the image:
 ```shell

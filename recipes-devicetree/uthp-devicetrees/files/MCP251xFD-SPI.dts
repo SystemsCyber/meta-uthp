@@ -8,21 +8,22 @@
 
 /dts-v1/;
 /plugin/;
+
 / {
     compatible = "ti,beaglebone", "ti,beaglebone-black"; // Compatible devices
-    exclusive-use = "P9.31", "P9.29", "P9.30", "P9.28", "P8.13", "gpio0_23"; // Pins used for SPI1 and GPIO interrupt
+    exclusive-use = "P9.31", "P9.29", "P9.30", "P9.28", "P8.13", "P8.11", "P9.42", "gpio0_23", "gpio1_13";
+    /* Interrupts for MCP2518FD */
+    /* gpio0_23 = P8.13, gpio1_13 = P8.11 */
+    /* CS for MCP2518FD */
+    /* SPI1.0 = P9.28, SPI1.1 = P9.42A */
+
     fragment@0 {
-        target = <&spi0>;
+        target = <&mcasp0>;
         __overlay__ {
-            status = "okay";
-            #address-cells = <1>;
-            #size-cells = <0>;
-            spidev@0 {
-                status = "disabled";
-                reg = <0>;
-            };
+            status = "disabled";
         };
     };
+
     fragment@1 {
         target = <&spi1>;
         __overlay__ {
@@ -41,7 +42,7 @@
         __overlay__ {
             spi1_pins: pinmux_spi1_pins {
                 pinctrl-single,pins = <
-                    0x190 0x33  /* P9.31 (SPI1_SCLK) | MODE3 | pullup I guess bc internet says so??? */
+                    0x190 0x33  /* P9.31 (SPI1_SCLK) | MODE3 | pullup */
                     0x194 0x33  /* P9.29 (SPI1_D0)   | MODE3 | RXACTIVE */
                     0x198 0x13  /* P9.30 (SPI1_D1)   | MODE3 */
                 >;
@@ -72,6 +73,7 @@
             };
         };
     };
+
     fragment@3 {
         target-path = "/"; // Target the root path
         __overlay__ {
@@ -116,15 +118,10 @@
                 clocks = <&mcp2518fd_clock>;
                 //ti,pindir-d0-out-d1-in = <1>;
                 mcp251xfd,oscillator-frequency = <40000000>; // 40 MHz oscillator frequency
-                mcp251xfd,irq-gpios = <&gpio1 13 0>; // GPIO0_23 for interrupt, active low
+                mcp251xfd,irq-gpios = <&gpio1 13 0>; // GPIO1_13 for interrupt, active low
                 mcp251xfd,stay-awake = <1>; // Keep MCP2518FD awake
                 mcp251xfd,enable-clkout = <1>; // Enable clock output
             };
         };
-    };
-    __overrides__ {
-        oscillator = <&mcp2518fd_clock>,"clock-frequency:0"; // Override for clock frequency
-        spimaxfrequency = <&can2 &can3>,"spi-max-frequency:0"; // Override for SPI max frequency
-        interrupt = <&can2_int>, <&can3_int>,"pinctrl-single,pins:0", <&can2>, <&can3>,"interrupts:0"; // Override for interrupt pin and type
     };
 };

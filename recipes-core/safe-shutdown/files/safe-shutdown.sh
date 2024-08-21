@@ -15,7 +15,7 @@ shutdown_system() {
 # Function to check power source
 check_power_source() {
     status=$(read_i2c_status)
-    if [ "$status" = "0x88" ]; then
+    if [ "$status" = "0x80" ]; then
         shutdown_system
     else
         # Check again after 2 seconds

@@ -18,7 +18,7 @@ CORE_OS = " \
     openssh openssh-keygen openssh-sftp-server \
     sudo \
     libgpiod libgpiod-tools libgpiod-dev \
-    usbutils gadget-init \
+    usbutils usb-gadget usb0-dhcp \
     safe-shutdown \
     locale-base-en-us \
     locale-base-en-gb \
@@ -88,6 +88,7 @@ EXTRA_TOOLS_INSTALL = " \
     man-db \
     tree \
     ncurses \
+    curl \
  "
 
 # FIXME: missing man command
@@ -154,6 +155,9 @@ PYTHON3_TOOLS = " \
 # actually add license files to recipes to be compliant
 ## kernel
 # add cmap and build can-isotp into the kernel
+## interesting tools we should add
+# https://github.com/coder/code-server/
+# https://github.com/mvduin/bbb-pin-utils/
 
 
 IMAGE_INSTALL += " \

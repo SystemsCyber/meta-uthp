@@ -142,6 +142,7 @@ PYTHON3_TOOLS = " \
     python3-pretty-j1587 \
     python3-py-hv-networks \
     python3-rpds-py \
+    python3-cmap \
  "
 # TODO:
 ## misc.
@@ -149,10 +150,10 @@ PYTHON3_TOOLS = " \
 # python3-pretty-j1587 --> add json files dynamically from our local storage
 # plc4trucksduck --> Test the firmware on the Yocto distro
 # python3-py-hv-networks
-## jupyter lab
+## jupyter lab - NOTE Fixed                 
 # python3-rpds-py \ --> needs to be v0.2.0??? NOTE: Fixed
 ## core image
-# fix uthp user home directory (not chowned by uthp)
+# fix uthp user home directory (not chowned by uthp) NOTE: Fixed
 # actually add license files to recipes to be compliant
 ## kernel
 # add cmap and build can-isotp into the kernel

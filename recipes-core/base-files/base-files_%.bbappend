@@ -5,6 +5,7 @@ SRC_URI += "file://init-uthp.sh \
             file://.bashrc \
             file://.bashrc-root \
             file://.bash_profile \
+            file://.nanorc \
             file://emmc-flasher.sh \
             file://timesyncd.conf \
             "
@@ -20,10 +21,12 @@ do_install:append() {
     install -d ${D}/root
     install -m 0644 ${WORKDIR}/.bashrc ${D}/home/uthp/.bashrc
     install -m 0644 ${WORKDIR}/.bash_profile ${D}/home/uthp/.bash_profile
+    install -m 0644 ${WORKDIR}/.nanorc ${D}/home/uthp/.nanorc
 
     # given that bash is the default shell, we need to install these files for root as well
     install -m 0644 ${WORKDIR}/.bashrc-root ${D}/root/.bashrc
     install -m 0644 ${WORKDIR}/.bash_profile ${D}/root/.bash_profile
+    install -m 0644 ${WORKDIR}/.nanorc ${D}/root/.nanorc
 
     install -d ${D}/opt/scripts
     install -m 0644 ${WORKDIR}/emmc-flasher.sh ${D}/opt/scripts/emmc-flasher.sh

@@ -1,0 +1,28 @@
+From 8af2ff775ed936e74124709a46818e80dd19deb3 Mon Sep 17 00:00:00 2001
+From: spenc3rb <beersc@colostate.edu>
+Date: Mon, 26 Aug 2024 11:06:37 -0600
+Subject: [PATCH] uthp-rtc
+
+---
+ arch/arm/boot/dts/BB-I2C1-MCP7940X-00A0.dtso | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm/boot/dts/BB-I2C1-MCP7940X-00A0.dtso b/arch/arm/boot/dts/BB-I2C1-MCP7940X-00A0.dtso
+index de62adf18cd4..fcb399621840 100644
+--- a/arch/arm/boot/dts/BB-I2C1-MCP7940X-00A0.dtso
++++ b/arch/arm/boot/dts/BB-I2C1-MCP7940X-00A0.dtso
+@@ -73,9 +73,9 @@
+ 	#address-cells = <1>;
+ 	#size-cells = <0>;
+ 
+-	extrtc: mcp7940x@68 {
++	extrtc: mcp7940x@6f {
+ 		status = "okay";
+ 		compatible = "microchip,mcp7940x";
+-		reg = <0x68>;
++		reg = <0x6f>;
+ 	};
+ };
+-- 
+2.34.1
+

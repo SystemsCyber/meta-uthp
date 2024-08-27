@@ -25,7 +25,9 @@ CORE_OS = " \
  "
 
 KERNEL_EXTRA_INSTALL = " \
+    kernel-dev \
     kernel-modules \
+    linux-libc-headers-dev \
     kernel-devsrc \
     uthp-devicetrees \
  "
@@ -89,6 +91,8 @@ EXTRA_TOOLS_INSTALL = " \
     tree \
     ncurses \
     curl \
+    bbb-pin-utils \
+    tzdata \
  "
 
 # FIXME: missing man command

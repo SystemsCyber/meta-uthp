@@ -8,6 +8,7 @@ SRC_URI += "file://init-uthp.sh \
             file://.nanorc \
             file://emmc-flasher.sh \
             file://timesyncd.conf \
+            file://fix-uthp \
             "
 
 do_install:append() {
@@ -35,7 +36,13 @@ do_install:append() {
     install -d ${D}${sysconfdir}/systemd/timesyncd.conf.d
     install -m 0644 ${WORKDIR}/timesyncd.conf ${D}${sysconfdir}/systemd/timesyncd.conf.d/timesyncd-uthp.conf
 
+    # install the fix-uthp script
+    install -d ${D}/usr/bin
+    install -m 0755 ${WORKDIR}/fix-uthp ${D}/usr/bin/fix-uthp
+
     # install the j1939 db
     # install -d ${D}${sysconfdir}/J1939
     # install -m 0644 ${WORKDIR}/J1939db.json ${D}${sysconfdir}/J1939/J1939db.json
 }
+
+RDEPENDS:${PN} += "bash"

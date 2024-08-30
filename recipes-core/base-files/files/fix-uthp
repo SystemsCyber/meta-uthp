@@ -1,0 +1,60 @@
+#!/bin/bash
+# This file contains things that the Yocto build configuration needs to fix
+# Ensure the script is run with sudo or root privileges
+if [[ $EUID -ne 0 ]]; then
+   echo "This program must be run as a sudo user. Exiting..."
+   exit 1
+fi
+
+# 1. change ownership of the home folder
+chown -R uthp:uthp /home/uthp
+echo "==> Changed ownership of /home/uthp to uthp:uthp"
+
+# 2. set-timezone
+timedatectl set-timezone America/Denver
+echo "==> Set the timezone to America/Denver"
+
+# 3. add dtbs to extlinux.conf
+# Define source and destination directories
+DTB_SOURCE_DIR="/boot/dtb/uthp/"
+EXTLINUX_DIR="/boot/p1/extlinux/"
+EXTLINUX_CONF="/boot/p1/extlinux/extlinux.conf"
+
+# Check if source and destination directories exist
+if [ ! -d "$DTB_SOURCE_DIR" ]; then
+    echo "Source directory $DTB_SOURCE_DIR does not exist."
+    exit 1
+fi
+
+if [ ! -d "$EXTLINUX_DIR" ]; then
+    echo "Destination directory $EXTLINUX_DIR does not exist."
+    mkdir -p "$EXTLINUX_DIR"
+fi
+
+# Copy some specific .dtbo files to source directory
+cp /boot/dtb/BB-I2C1-MCP7940X-00A0.dtbo "$DTB_SOURCE_DIR"
+
+# Copy all *.dtbo files from source to destination directory
+cp "$DTB_SOURCE_DIR"*.dtbo "$EXTLINUX_DIR"
+
+# Backup the extlinux.conf file
+cp "$EXTLINUX_CONF" "${EXTLINUX_CONF}.backup.$(date +%Y%m%d%H%M%S)"
+
+# Prepare the FDTOVERLAYS line
+FDTOVERLAYS="FDTOVERLAYS"
+for dtbo_file in "$EXTLINUX_DIR"*.dtbo; do
+    dtbo_filename=$(basename "$dtbo_file")
+    FDTOVERLAYS="${FDTOVERLAYS} ./${dtbo_filename}"
+done
+
+# Insert the FDTOVERLAYS line after the FDTDIR line and before the APPEND line
+# First, remove any existing FDTOVERLAYS line
+sed -i '/FDTOVERLAYS/d' "$EXTLINUX_CONF"
+
+# Insert the new FDTOVERLAYS line
+sed -i "/FDTDIR ../a \\\t${FDTOVERLAYS}" "$EXTLINUX_CONF"
+
+echo "The .dtbo files have been added to the extlinux.conf file as a single FDTOVERLAYS line as follows:"
+cat "$EXTLINUX_CONF" | grep FDTOVERLAYS
+
+echo "==> fix-uthp ran successfully!"

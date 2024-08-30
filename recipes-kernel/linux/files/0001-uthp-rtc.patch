@@ -1,16 +1,51 @@
-From 8af2ff775ed936e74124709a46818e80dd19deb3 Mon Sep 17 00:00:00 2001
+From 55aa603a401282e7d25f40131fa8ac2c8d5eb6be Mon Sep 17 00:00:00 2001
 From: spenc3rb <beersc@colostate.edu>
-Date: Mon, 26 Aug 2024 11:06:37 -0600
+Date: Fri, 30 Aug 2024 10:18:08 -0600
 Subject: [PATCH] uthp-rtc
 
 ---
- arch/arm/boot/dts/BB-I2C1-MCP7940X-00A0.dtso | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ arch/arm/boot/dts/BB-I2C1-MCP7940X-00A0.dtso | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
 
 diff --git a/arch/arm/boot/dts/BB-I2C1-MCP7940X-00A0.dtso b/arch/arm/boot/dts/BB-I2C1-MCP7940X-00A0.dtso
-index de62adf18cd4..fcb399621840 100644
+index de62adf18cd4..bdc634c6e350 100644
 --- a/arch/arm/boot/dts/BB-I2C1-MCP7940X-00A0.dtso
 +++ b/arch/arm/boot/dts/BB-I2C1-MCP7940X-00A0.dtso
+@@ -24,7 +24,7 @@
+ &ocp {
+ 	P9_17_pinmux { status = "disabled"; };	/* spi0_d1.i2c1_sda */
+ 	P9_18_pinmux { status = "disabled"; };	/* spi0_cs0.i2c1_scl */
+-	P8_26_pinmux { status = "disabled"; };	/* rtc: gpio1_29 */
++	P8_30_pinmux { status = "disabled"; };	/* rtc: gpio2_25 */
+ };
+ 
+ &{/} {
+@@ -37,11 +37,11 @@
+ 	gpio_keys {
+ 		compatible = "gpio-keys";
+ 		pinctrl-names = "default";
+-		pinctrl-0 = <&bb_gpio1_29_pins>;
++		pinctrl-0 = <&bb_gpio2_25_pins>;
+ 
+ 		rtc_mfp@1 {
+ 			label = "rtc_mfp";
+-			gpios = <&gpio1 29 GPIO_ACTIVE_HIGH>;
++			gpios = <&gpio2 25 GPIO_ACTIVE_HIGH>;
+ 			linux,code = <143>; /* System Wake Up */
+ 			gpio-key,wakeup;
+ 		};
+@@ -49,9 +49,9 @@
+ };
+ 
+ &am33xx_pinmux {
+-	bb_gpio1_29_pins: pinmux_bb_gpio1_29_pins {
++	bb_gpio2_25_pins: pinmux_bb_gpio2_25_pins {
+ 		pinctrl-single,pins = <
+-			AM33XX_PADCONF(AM335X_PIN_GPMC_CSN0, PIN_INPUT, MUX_MODE7) /* gpmc_csn0.gpio1_29 */
++			AM33XX_PADCONF(AM335X_PIN_LCD_AC_BIAS_EN, PIN_INPUT, MUX_MODE7) /* lcd_ac_bias_en.gpio2_25 */
+ 		>;
+ 	};
+ 
 @@ -73,9 +73,9 @@
  	#address-cells = <1>;
  	#size-cells = <0>;

@@ -59,7 +59,7 @@ usb_ms_cdrom=0
 usb_ms_nofua=1
 usb_ms_removable=1
 usb_ms_ro=1
-usb_ms_imagefile=/etc/bbb.io/templates/beagle-getting-started.img
+usb_ms_imagefile=/dev/mmcblk0p1
 
 if [ -f /etc/default/usb-oem ] ; then
 	. /etc/default/usb-oem
@@ -143,14 +143,16 @@ run_libcomposite () {
 		mkdir -p functions/acm.usb3
 		ln -s functions/acm.usb3 configs/c.1/
 
-                echo "${log} enable USB mass_storage img file"
-                mkdir -p functions/mass_storage.usb0
-                echo ${usb_ms_stall} > functions/mass_storage.usb0/stall
-                echo ${usb_ms_cdrom} > functions/mass_storage.usb0/lun.0/cdrom
-                echo ${usb_ms_nofua} > functions/mass_storage.usb0/lun.0/nofua
-                echo ${usb_ms_removable} > functions/mass_storage.usb0/lun.0/removable
-                echo ${usb_ms_ro} > functions/mass_storage.usb0/lun.0/ro
-                ln -s functions/mass_storage.usb0 configs/c.1/
+		# Commented out mass storage gadget unless needed
+		# echo "${log} enable USB mass_storage img file"
+		# mkdir -p functions/mass_storage.usb0
+		# echo ${usb_ms_stall} > functions/mass_storage.usb0/stall
+		# echo ${usb_ms_cdrom} > functions/mass_storage.usb0/lun.0/cdrom
+		# echo ${usb_ms_nofua} > functions/mass_storage.usb0/lun.0/nofua
+		# echo ${usb_ms_removable} > functions/mass_storage.usb0/lun.0/removable
+		# echo ${usb_ms_ro} > functions/mass_storage.usb0/lun.0/ro
+		# echo ${usb_ms_imagefile} > functions/mass_storage.usb0/lun.0/file
+		# ln -s functions/mass_storage.usb0 configs/c.1/
 	fi
 
 	cd /sys/kernel/config/usb_gadget/g_multi

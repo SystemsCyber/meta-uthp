@@ -1,0 +1,103 @@
+/* PLC4TRUCKSDuck (c) 2020 National Motor Freight Traffic Association
+* 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+* 
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+* 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.)
+*/
+
+/dts-v1/;
+/plugin/;
+
+/ {
+  compatible = "ti,beaglebone", "ti,beaglebone-black";
+  part-number = "BB-PLC4TRUCKSDUC"; /* 16 byte name limit */
+  version = "00A0";
+
+  exclusive-use =
+    "uart4", "P9.11", "P9.13", /* UART4 for PLC */
+    "P9.12", /* GPIO_60 for PLC line idle detection */
+    "uart2", "P9.21", "P9.22", /* UART2 for J1708 */
+    "P9.14", /* GPIO_40 for J1708 line idle detection */
+    "pruss";
+
+  fragment@0 {
+    target = <&am33xx_pinmux>;
+    __overlay__ {
+      j1708_pins: pinmux_j1708_pins {
+        pinctrl-single,pins = <
+          0x154 0x01  /* P9.21: uart2_txd : MODE1 */
+          0x150 0x21  /* P9.22: uart2_rxd : MODE1|RX_ACTIVE */
+          0x048 0x27  /* P9.14: gpio1[8]  : MODE7|RX_ACTIVE (GPIO_40) */
+        >;
+      };
+    };
+  };
+
+  fragment@1 {
+    target = <&am33xx_pinmux>;
+    __overlay__ {
+      plc_pins: pinmux_plc_pins {
+        pinctrl-single,pins = <
+          //0x074 0x06  /* P9.13: uart4_txd : MODE6 */
+          //0x070 0x26  /* P9.11: uart4_rxd : MODE6 | RX_ACTIVE */
+          0x078 0x27  /* P9.12: gpio1[28] : MODE7 | RX_ACTIVE (GPIO_60) */
+        >;
+      };
+    };
+  };
+
+  fragment@2 {
+    target = <&am33xx_pinmux>;
+    __overlay__ {
+      test_pins: pinmux_test_pins {
+        pinctrl-single,pins = <
+          0x184 0x5 /* P9.24: PRU-UART0tx : MODE5 */
+          0x180 0x5 /* P9.26: PRU-UART0rx : MODE5 */
+        >;
+      };
+    };
+  };
+
+  fragment@3 {
+    target = <&pruss>;
+    __overlay__ {
+      status = "okay";
+      pinctrl-names = "default";
+      pinctrl-0 = <&j1708_pins &plc_pins &test_pins>;
+    };
+  };
+
+  /* fragment@2 {
+    target = <&uart2>;
+    __overlay__ {
+      status = "okay";
+      pinctrl-names = "default";
+      pinctrl-0 = <&j1708_pins>;
+    };
+  };
+
+  fragment@3 {
+    target = <&uart4>;
+    __overlay__ {
+      status = "okay";
+      pinctrl-names = "default";
+      pinctrl-0 = <&plc_pins>;
+    };
+  }; */
+};
+
+

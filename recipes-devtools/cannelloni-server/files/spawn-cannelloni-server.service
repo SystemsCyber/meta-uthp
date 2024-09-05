@@ -1,0 +1,11 @@
+[Unit]
+Description=Cannelloni Client Service
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/opt/scripts/cannelloni-server/start.sh
+User=root
+
+[Install]
+WantedBy=multi-user.target

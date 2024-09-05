@@ -5,6 +5,8 @@ SRC_URI += "file://BB-UTHP-DCAN.dtbo \
             file://BB-PLC4TRUCKSDUC-00A0.dts \
             file://MCP251xFD-SPI.dtbo \
             file://MCP251xFD-SPI.dts \
+            file://BB-UART5-00A0.dtbo \
+            file://BB-UART5-00A0.dts \
             "
 
 LICENSE = "CLOSED"

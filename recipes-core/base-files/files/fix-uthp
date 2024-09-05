@@ -14,7 +14,11 @@ echo "==> Changed ownership of /home/uthp to uthp:uthp"
 timedatectl set-timezone America/Denver
 echo "==> Set the timezone to America/Denver"
 
-# 3. add dtbs to extlinux.conf
+# 3. sync hwclock
+hwclock --systohc
+echo "==> Synced the hardware clock with the system clock"
+
+# 4. add dtbs to extlinux.conf
 # Define source and destination directories
 DTB_SOURCE_DIR="/boot/dtb/uthp/"
 EXTLINUX_DIR="/boot/p1/extlinux/"
@@ -57,4 +61,18 @@ sed -i "/FDTDIR ../a \\\t${FDTOVERLAYS}" "$EXTLINUX_CONF"
 echo "The .dtbo files have been added to the extlinux.conf file as a single FDTOVERLAYS line as follows:"
 cat "$EXTLINUX_CONF" | grep FDTOVERLAYS
 
+echo "==> Added .dtbo files to extlinux.conf"
+
+# 5. Update and install firmware
+apt update -y
+apt install sigrok-firmware-fx2lafw -y
+echo "==> Updated and installed firmware for sigrok"
+
+# 6. Update the baud rate on UART5
+stty -F /dev/ttyS5 19200
+echo "==> Updated the baud rate on UART5 to 19200"
+
 echo "==> fix-uthp ran successfully!"
+echo "==> Reboot the system to apply the changes."
+echo -e "Note: run 'git clone https://github.com/lin-bus/linux-lin', cd to /usr/src/kernel/ and 'sudo make scripts',\n
+         cd to the sllin directory, and run 'sudo make' to build the sllin.ko module."

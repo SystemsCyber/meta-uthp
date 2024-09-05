@@ -93,6 +93,9 @@ EXTRA_TOOLS_INSTALL = " \
     curl \
     bbb-pin-utils \
     tzdata \
+    libxml2-dev \
+    libnl \
+    libnl-dev \
  "
 
 # FIXME: missing man command
@@ -106,6 +109,7 @@ CAN_TOOLS = " \
     can2 \
     truckdevil \
     cannelloni \
+    cannelloni-server \
  "
 # deleted config-pin
 PREFERRED_VERSION_python = "2.7"
@@ -128,6 +132,7 @@ PYTHON3_TOOLS = " \
     packagegroup-python3-jupyter \
     python3-scapy \
     python3-can \
+    python3-cmap \
     python3-cantools \
     python3-six \
     python3-cancat \
@@ -147,21 +152,32 @@ PYTHON3_TOOLS = " \
     python3-py-hv-networks \
  "
 # TODO:
-## misc.
+
+## Tools we still need to add / test
 # python3-pretty-j1939 --> add json files dynamically from our local storage
 # python3-pretty-j1587 --> add json files dynamically from our local storage
 # plc4trucksduck --> Test the firmware on the Yocto distro
 # python3-py-hv-networks
+# scapy-automotive
+## Tools we need to port
+# CanCat --> needs to be ported to SocketCAN
+# PLC4TrucksDuck --> needs to be ported to RPMsg
+## Tools we need to expose over serial
+# M2 CAN encoding forwarder from the BBB to the Laptop
+# Expose CanCat encoding to the the Laptop
+# Expose GRIMMs j1708 encoding for use by GRIMMs tools
+## Tools we need to expose over TCP/UDP
+# Expose the py-hv-networks j1708 udp server (already done pretty much)
+# Expose M2 CAN encoding over TCP socket and add Truck Devil 'serial stuff'
+# Expose CanCat encoding over TCP socket and add TCP support to CanCat
+# Expose GRIMMs j1708 encoding over TCP socket and add TCP supprot to GRIMMs tools
 ## jupyter lab
 # python3-rpds-py \ --> needs to be v0.2.0???
 ## core image
-# fix uthp user home directory (not chowned by uthp)
+# (check the fix-uthp script under base-files)
 # actually add license files to recipes to be compliant
-## kernel
-# add cmap and build can-isotp into the kernel
 ## interesting tools we should add
 # https://github.com/coder/code-server/
-# https://github.com/mvduin/bbb-pin-utils/
 
 
 IMAGE_INSTALL += " \

@@ -16,7 +16,7 @@
 * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-* SOFTWARE.)
+* SOFTWARE.
 */
 
 /dts-v1/;
@@ -35,6 +35,18 @@
     "pruss";
 
   fragment@0 {
+    target = <&ocp>;
+    __overlay__ {
+      P9_12_pinmux { status = "disabled"; };  /* gpio1[28] */
+      P9_14_pinmux { status = "disabled"; };  /* gpio1[18] */
+      P9_21_pinmux { status = "disabled"; };  /* uart2_txd */
+      P9_22_pinmux { status = "disabled"; };  /* uart2_rxd */
+      P9_11_pinmux { status = "disabled"; };  /* uart4_rxd */
+      P9_13_pinmux { status = "disabled"; };  /* uart4_txd */
+    };
+  };
+
+  fragment@1 {
     target = <&am33xx_pinmux>;
     __overlay__ {
       j1708_pins: pinmux_j1708_pins {
@@ -47,32 +59,32 @@
     };
   };
 
-  fragment@1 {
+  fragment@2 {
     target = <&am33xx_pinmux>;
     __overlay__ {
       plc_pins: pinmux_plc_pins {
         pinctrl-single,pins = <
-          //0x074 0x06  /* P9.13: uart4_txd : MODE6 */
-          //0x070 0x26  /* P9.11: uart4_rxd : MODE6 | RX_ACTIVE */
+          0x074 0x06  /* P9.13: uart4_txd : MODE6 */
+          0x070 0x26  /* P9.11: uart4_rxd : MODE6 | RX_ACTIVE */
           0x078 0x27  /* P9.12: gpio1[28] : MODE7 | RX_ACTIVE (GPIO_60) */
         >;
       };
     };
   };
 
-  fragment@2 {
+  fragment@3 {
     target = <&am33xx_pinmux>;
     __overlay__ {
       test_pins: pinmux_test_pins {
         pinctrl-single,pins = <
-          0x184 0x5 /* P9.24: PRU-UART0tx : MODE5 */
-          0x180 0x5 /* P9.26: PRU-UART0rx : MODE5 */
+          0x184 0x05 /* P9.24: PRU-UART0tx : MODE5 */
+          0x180 0x05 /* P9.26: PRU-UART0rx : MODE5 */
         >;
       };
     };
   };
 
-  fragment@3 {
+  fragment@4 {
     target = <&pruss>;
     __overlay__ {
       status = "okay";
@@ -80,24 +92,4 @@
       pinctrl-0 = <&j1708_pins &plc_pins &test_pins>;
     };
   };
-
-  /* fragment@2 {
-    target = <&uart2>;
-    __overlay__ {
-      status = "okay";
-      pinctrl-names = "default";
-      pinctrl-0 = <&j1708_pins>;
-    };
-  };
-
-  fragment@3 {
-    target = <&uart4>;
-    __overlay__ {
-      status = "okay";
-      pinctrl-names = "default";
-      pinctrl-0 = <&plc_pins>;
-    };
-  }; */
 };
-
-

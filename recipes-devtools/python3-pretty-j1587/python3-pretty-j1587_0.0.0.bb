@@ -14,29 +14,21 @@ inherit setuptools3
 RDEPENDS:${PN} += "perl python python3"
 
 do_compile() {
-    # Build the package using the backend specified in pyproject.toml
-    # This command depends on the build system used by the package
-    #oe_runmake # or custom build command, e.g., poetry build
     echo "++++++++++++++++++++++++ No compile necesary"
 }
 
 do_install() {
-    # Install executable files
-    install -d ${D}${sbindir}
-    install -m 0755 ${S}/pretty_j1587.py ${D}${sbindir}/pretty_j1587.py
-    install -m 0755 ${S}/fuzzymessages.py ${D}${sbindir}/fuzzymessages.py
-
-    # Rest of the files dump into the /etc/pretty_1587
-    install -d ${D}${sysconfdir}/pretty_1587
-    install -m 0644 ${S}/canon_functions.py ${D}${sysconfdir}/pretty_1587/canon_functions.py
-    install -m 0644 ${S}/config.cfg ${D}${sysconfdir}/pretty_1587/config.cfg
-    install -m 0644 ${S}/LICENSE ${D}${sysconfdir}/pretty_1587/LICENSE
-    install -m 0644 ${S}/README.md ${D}${sysconfdir}/pretty_1587/README.md
-    install -m 0644 ${S}/requirements.txt ${D}${sysconfdir}/pretty_1587/requirements.txt
-    install -m 0644 ${S}/samplejson.def ${D}${sysconfdir}/pretty_1587/samplejson.def
-    install -m 0644 ${S}/struct_from_J1587.py ${D}${sysconfdir}/pretty_1587/struct_from_J1587.py
-    install -m 0644 ${S}/test_pretty_j1587.py ${D}${sysconfdir}/pretty_1587/test_pretty_j1587.py
-    # Repeat for other directories and files as necessary
+    install -d ${D}/home/uthp/pretty_j1587
+    install -m 0755 ${S}/pretty_j1587.py ${D}/home/uthp/pretty_j1587/pretty_j1587.py
+    install -m 0755 ${S}/fuzzymessages.py ${D}/home/uthp/pretty_j1587/fuzzymessages.py
+    install -m 0644 ${S}/canon_functions.py ${D}/home/uthp/pretty_j1587/canon_functions.py
+    install -m 0644 ${S}/config.cfg ${D}/home/uthp/pretty_j1587/config.cfg
+    install -m 0644 ${S}/LICENSE ${D}/home/uthp/pretty_j1587/LICENSE
+    install -m 0644 ${S}/README.md ${D}/home/uthp/pretty_j1587/README.md
+    install -m 0644 ${S}/requirements.txt ${D}/home/uthp/pretty_j1587/requirements.txt
+    install -m 0644 ${S}/samplejson.def ${D}/home/uthp/pretty_j1587/samplejson.def
+    install -m 0644 ${S}/struct_from_J1587.py ${D}/home/uthp/pretty_j1587/struct_from_J1587.py
+    install -m 0644 ${S}/test_pretty_j1587.py ${D}/home/uthp/pretty_j1587/test_pretty_j1587.py
 }
 
-
+FILES:${PN} += "/home/uthp/pretty_j1587/*"

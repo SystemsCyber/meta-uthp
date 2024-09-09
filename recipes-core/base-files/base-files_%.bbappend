@@ -7,7 +7,7 @@ SRC_URI += "file://init-uthp.sh \
             file://.bash_profile \
             file://emmc-flasher.sh \
             file://timesyncd.conf \
-            file://J1939db.json \
+            file:///storage/J1939/J1939db.json \
             "
 
 do_install:append() {

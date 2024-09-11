@@ -96,6 +96,8 @@ EXTRA_TOOLS_INSTALL = " \
     libxml2-dev \
     libnl \
     libnl-dev \
+    pru-icss \
+    ti-cgt-pru \
  "
 
 # FIXME: missing man command

@@ -31,8 +31,7 @@
     "uart4", "P9.11", "P9.13", /* UART4 for PLC */
     "P9.12", /* GPIO_60 for PLC line idle detection */
     "uart2", "P9.21", "P9.22", /* UART2 for J1708 */
-    "P9.14", /* GPIO_40 for J1708 line idle detection */
-    "pruss";
+    "P9.14"; /* GPIO_40 for J1708 line idle detection */
 
   fragment@0 {
     target = <&ocp>;
@@ -73,23 +72,11 @@
   };
 
   fragment@3 {
-    target = <&am33xx_pinmux>;
-    __overlay__ {
-      test_pins: pinmux_test_pins {
-        pinctrl-single,pins = <
-          0x184 0x05 /* P9.24: PRU-UART0tx : MODE5 */
-          0x180 0x05 /* P9.26: PRU-UART0rx : MODE5 */
-        >;
-      };
-    };
-  };
-
-  fragment@4 {
     target = <&pruss>;
     __overlay__ {
       status = "okay";
       pinctrl-names = "default";
-      pinctrl-0 = <&j1708_pins &plc_pins &test_pins>;
+      pinctrl-0 = <&j1708_pins &plc_pins>;
     };
   };
 };

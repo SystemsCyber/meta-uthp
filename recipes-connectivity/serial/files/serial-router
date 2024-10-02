@@ -1,0 +1,86 @@
+#!/usr/bin/python3
+import time
+import serial
+import threading
+import glob
+import sys
+
+mapped_devices = set()
+stop_threads = False
+
+def forward(src, dst):
+    global stop_threads
+    while not stop_threads:
+        try:
+            data = src.read(1024)
+            if data:
+                dst.write(data)
+        except Exception as e:
+            print(f"Error in forwarding data: {e}")
+            break
+
+def map_devices():
+    global mapped_devices
+    acm_devices = glob.glob('/dev/ttyACM*')[:3]  # Discover ACM devices and limit to the first 3
+    serial_ports = []
+    threads = []
+
+    # map each ACM device to a GS device given that the device could be a: TruckDevil, CanCat, and/or a GRIMMj1708
+    for i, acm_device in enumerate(acm_devices):
+        if acm_device in mapped_devices:
+            continue
+
+        gs_device = f"/dev/ttyGS{i}"
+        print(f"Mapping {acm_device} to {gs_device}")
+        try:
+            ser_acm = serial.Serial(acm_device, baudrate=115200, timeout=0)
+            ser_gs = serial.Serial(gs_device, baudrate=115200, timeout=0)
+        except Exception as e:
+            print(f"Error opening serial ports for {acm_device} and {gs_device}: {e}")
+            continue
+
+        serial_ports.extend([ser_acm, ser_gs])
+        mapped_devices.add(acm_device)
+
+        # thread to forward data from ACM to GS
+        t1 = threading.Thread(target=forward, args=(ser_acm, ser_gs))
+
+        # thread to forward data from GS to ACM
+        t2 = threading.Thread(target=forward, args=(ser_gs, ser_acm))
+
+        t1.daemon = True  # exit if main thread exits
+        t2.daemon = True  # exit if main thread exits
+        t1.start()  # start forwarding ACM to GS
+        t2.start()  # start forwarding GS to ACM
+        threads.extend([t1, t2])
+
+    return serial_ports, threads
+
+def check_device_status(serial_ports, threads):
+    global mapped_devices, stop_threads
+    for ser in serial_ports:
+        if not ser.is_open:
+            print(f"Device {ser.port} disconnected")
+            mapped_devices.discard(ser.port)
+            serial_ports.remove(ser)
+            ser.close()
+            stop_threads = True
+            for t in threads:
+                t.join()
+            stop_threads = False 
+
+def main():
+    while True:
+        serial_ports, threads = map_devices()
+        try:
+            # check if any device disconnected every 10 seconds
+            check_device_status(serial_ports, threads)
+            time.sleep(10)
+        except KeyboardInterrupt:
+            print("Exiting...")
+            for ser in serial_ports:
+                ser.close()
+            sys.exit()
+
+if __name__ == "__main__":
+    main()

@@ -1,10 +1,11 @@
 [Unit]
-Description=Cannelloni Client Service
+Description=TCP Routing
 After=network.target
 
 [Service]
 Type=simple
-ExecStart=/opt/uthp/scripts/cannelloni-server/start.sh
+ExecStart=/usr/bin/tcp-router
+Restart=on-failure
 User=root
 
 [Install]

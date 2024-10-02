@@ -1,0 +1,143 @@
+#!/usr/bin/python3
+import time
+import serial
+import threading
+import glob
+import sys
+import socket
+
+mapped_devices = set()
+stop_threads = False
+base_port = 48620  # base port number for sockets
+
+def forward_serial_to_socket(ser, sock):
+    """Forward data from serial port to socket."""
+    while True:
+        try:
+            data = ser.read(1024)
+            if data:
+                sock.sendall(data)
+            else:
+                time.sleep(0.01)
+        except Exception as e:
+            print(f"Error in forwarding data from serial to socket: {e}")
+            break
+    sock.close()
+
+def forward_socket_to_serial(sock, ser):
+    """Forward data from socket to serial port."""
+    while True:
+        try:
+            data = sock.recv(1024)
+            if data:
+                ser.write(data)
+            else:
+                break
+        except Exception as e:
+            print(f"Error in forwarding data from socket to serial: {e}")
+            break
+    sock.close()
+
+def accept_clients(ser_acm, sock_server):
+    """Accept client connections and start forwarding threads."""
+    while True:
+        try:
+            client_socket, client_address = sock_server.accept()
+            print(f"Accepted connection from {client_address}")
+            t1 = threading.Thread(target=forward_serial_to_socket, args=(ser_acm, client_socket))
+            t2 = threading.Thread(target=forward_socket_to_serial, args=(client_socket, ser_acm))
+            t1.daemon = True
+            t2.daemon = True
+            t1.start()
+            t2.start()
+        except Exception as e:
+            print(f"Error accepting client: {e}")
+            break
+    sock_server.close()
+
+def map_devices():
+    global mapped_devices
+    acm_devices = glob.glob('/dev/ttyACM*')  # Discover all ACM devices
+    serial_ports = []
+    sock_servers = []
+    threads = []
+
+    for acm_device in acm_devices:
+        if acm_device in mapped_devices:
+            continue
+
+        try:
+            # Simplify ACM number extraction using slicing
+            acm_number = int(acm_device[11:])
+        except ValueError:
+            print(f"Could not extract ACM number from {acm_device}")
+            continue
+
+        port_number = base_port + acm_number
+        print(f"Mapping {acm_device} to socket on port {port_number}")
+        try:
+            ser_acm = serial.Serial(acm_device, baudrate=115200, timeout=0)
+        except Exception as e:
+            print(f"Error opening serial port {acm_device}: {e}")
+            continue
+
+        # Create a TCP socket server
+        sock_server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock_server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        server_address = ('', port_number)
+        try:
+            sock_server.bind(server_address)
+            sock_server.listen(5)
+        except Exception as e:
+            print(f"Error setting up socket server on port {port_number}: {e}")
+            ser_acm.close()
+            continue
+
+        serial_ports.append(ser_acm)
+        sock_servers.append(sock_server)
+        mapped_devices.add(acm_device)
+
+        # Start thread to accept clients
+        t_accept = threading.Thread(target=accept_clients, args=(ser_acm, sock_server))
+        t_accept.daemon = True
+        t_accept.start()
+        threads.append(t_accept)
+
+    return serial_ports, sock_servers, threads
+
+def check_device_status(serial_ports, sock_servers, threads):
+    global mapped_devices, stop_threads
+    for ser in serial_ports[:]:
+        if not ser.is_open:
+            print(f"Device {ser.port} disconnected")
+            mapped_devices.discard(ser.port)
+            serial_ports.remove(ser)
+            ser.close()
+            stop_threads = True
+            for t in threads:
+                t.join()
+            stop_threads = False
+
+def main():
+    serial_ports = []
+    sock_servers = []
+    threads = []
+    try:
+        while True:
+            new_serial_ports, new_sock_servers, new_threads = map_devices()
+            serial_ports.extend(new_serial_ports)
+            sock_servers.extend(new_sock_servers)
+            threads.extend(new_threads)
+            # Continuously check device status
+            check_device_status(serial_ports, sock_servers, threads)
+            time.sleep(10)
+    except KeyboardInterrupt:
+        print("Exiting...")
+        for ser in serial_ports:
+            ser.close()
+        for sock in sock_servers:
+            sock.close()
+        sys.exit()
+
+if __name__ == "__main__":
+    main()

@@ -22,6 +22,8 @@ CORE_OS = " \
     safe-shutdown \
     locale-base-en-us \
     locale-base-en-gb \
+    uthp-serial-services \
+    uthp-tcp-services \
  "
 
 KERNEL_EXTRA_INSTALL = " \
@@ -54,6 +56,14 @@ DEV_SDK_INSTALL = " \
     make \
     perl-modules \
     pkgconfig \
+    bbb-pin-utils \
+    tzdata \
+    libxml2-dev \
+    libnl \
+    libnl-dev \
+    pru-icss \
+    ti-cgt-pru \
+    screen \
  "
 # need rsync to get the files from the host to the target for apt-keys at least
 
@@ -91,13 +101,6 @@ EXTRA_TOOLS_INSTALL = " \
     tree \
     ncurses \
     curl \
-    bbb-pin-utils \
-    tzdata \
-    libxml2-dev \
-    libnl \
-    libnl-dev \
-    pru-icss \
-    ti-cgt-pru \
  "
 
 # FIXME: missing man command
@@ -152,7 +155,11 @@ PYTHON3_TOOLS = " \
     python3-pretty-j1939 \
     python3-pretty-j1587 \
     python3-py-hv-networks \
+    plc4trucksduck \
+    python3-can-isotp \
+    python3-inputtimeout \
  "
+
 # TODO:
 
 ## Tools we still need to add / test
@@ -160,24 +167,30 @@ PYTHON3_TOOLS = " \
 # python3-pretty-j1587 --> add json files dynamically from our local storage
 # plc4trucksduck --> Test the firmware on the Yocto distro
 # python3-py-hv-networks
-# scapy-automotive
+# cmap
+# cannelloni-server
+
 ## Tools we need to port
 # CanCat --> needs to be ported to SocketCAN
-# PLC4TrucksDuck --> needs to be ported to RPMsg
+
 ## Tools we need to expose over serial
-# M2 CAN encoding forwarder from the BBB to the Laptop
-# Expose CanCat encoding to the the Laptop
+# Expose CanCat encoding for use by CanCat
 # Expose GRIMMs j1708 encoding for use by GRIMMs tools
+# Exopose Truck Devil 'serial stuff' for use by Truck Devil
+
 ## Tools we need to expose over TCP/UDP
 # Expose the py-hv-networks j1708 udp server (already done pretty much)
 # Expose M2 CAN encoding over TCP socket and add Truck Devil 'serial stuff'
 # Expose CanCat encoding over TCP socket and add TCP support to CanCat
 # Expose GRIMMs j1708 encoding over TCP socket and add TCP supprot to GRIMMs tools
+
 ## jupyter lab
 # python3-rpds-py \ --> needs to be v0.2.0???
+
 ## core image
 # (check the fix-uthp script under base-files)
 # actually add license files to recipes to be compliant
+
 ## interesting tools we should add
 # https://github.com/coder/code-server/
 

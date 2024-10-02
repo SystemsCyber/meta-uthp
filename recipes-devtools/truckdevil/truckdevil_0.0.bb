@@ -10,8 +10,23 @@ SRC_URI[sha256sum] = "7c72341c6e872d9b9e10a681d77a407e8e2cf4e1b88a315e24bd82a938
 S = "${WORKDIR}/git"
 
 # install full TruckDevil package in /home/uthp
-FILES:${PN} += "/home/uthp/*"
 do_install() {
-    install -d ${D}/home/uthp
-    cp -r ${S}/truckdevil ${D}/home/uthp
+    install -d ${D}/opt/uthp/programs
+    install -d ${D}/usr/bin
+
+    cp -r ${S}/truckdevil ${D}/opt/uthp/programs
+
+    ln -s /opt/uthp/programs/truckdevil/truckdevil.py ${D}/usr/bin/truckdevil
+
+    chmod +x ${D}/opt/uthp/programs/truckdevil/truckdevil.py
 }
+
+
+# Quickly edit the shebang line
+do_compile() {
+    sed -i '1i #!/usr/bin/python3' ${S}/truckdevil/truckdevil.py
+}
+
+RDEPENDS:${PN} += "python3-core python3"
+FILES:${PN} += "/opt/uthp/programs/truckdevil \
+                /usr/bin/truckdevil"

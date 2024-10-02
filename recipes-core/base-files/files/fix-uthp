@@ -37,6 +37,8 @@ fi
 
 # Copy some specific .dtbo files to source directory
 cp /boot/dtb/BB-I2C1-MCP7940X-00A0.dtbo "$DTB_SOURCE_DIR"
+cp /boot/dtb/BB-UART4-00A0.dtbo "$DTB_SOURCE_DIR"
+cp /boot/dtb/BB-UART2-00A0.dtbo "$DTB_SOURCE_DIR"
 
 # Copy all *.dtbo files from source to destination directory
 cp "$DTB_SOURCE_DIR"*.dtbo "$EXTLINUX_DIR"
@@ -64,9 +66,15 @@ cat "$EXTLINUX_CONF" | grep FDTOVERLAYS
 echo "==> Added .dtbo files to extlinux.conf"
 
 # 5. Update and install firmware
-apt update -y
-apt install sigrok-firmware-fx2lafw -y
-echo "==> Updated and installed firmware for sigrok"
+# Ask to skip
+read -p "Do you want to skip updating and installing firmware for sigrok? (y/n): " skip_firmware
+if [ "$skip_firmware" == "y" ]; then
+    echo "==> Skipped updating and installing firmware for sigrok"
+else
+    apt update -y
+    apt install sigrok-firmware-fx2lafw -y
+    echo "==> Updated and installed firmware for sigrok"
+fi
 
 # 6. Update the baud rate on UART5
 stty -F /dev/ttyS5 19200

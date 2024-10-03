@@ -9,6 +9,7 @@ SRC_URI += "file://init-uthp.sh \
             file://emmc-flasher \
             file://timesyncd.conf \
             file://fix-uthp \
+            file:///storage/J1939/J1939db.json \
             "
 
 do_install:append() {
@@ -24,6 +25,10 @@ do_install:append() {
     install -m 0644 ${WORKDIR}/.bashrc ${D}/home/uthp/.bashrc
     install -m 0644 ${WORKDIR}/.bash_profile ${D}/home/uthp/.bash_profile
     install -m 0644 ${WORKDIR}/.nanorc ${D}/home/uthp/.nanorc
+
+    # J1939 Digital Annex
+    install -d ${D}/home/uthp/J1939
+    install -m 0644 ${WORKDIR}/J1939db.json ${D}/home/uthp/J1939/J1939db.json
 
     # given that bash is the default shell, we need to install these files for root as well
     install -m 0644 ${WORKDIR}/.bashrc-root ${D}/root/.bashrc

@@ -10,7 +10,15 @@ SRC_URI[sha256sum] = "7c72341c6e872d9b9e10a681d77a407e8e2cf4e1b88a315e24bd82a938
 
 S = "${WORKDIR}/git"
 
-# Assuming the use of poetry or a similar tool as the build backend
-inherit setuptools3
+do_compile() {
+    :
+}
 
+do_install:append() {
+    install -d ${D}/home/uthp/pretty_j1939
+    cp -r ${S}/* ${D}/home/uthp/pretty_j1939
+}
 
+RDEPENDS:${PN} += "python3-bitarray"
+
+FILES:${PN} += "/home/uthp/pretty_j1939/*"

@@ -152,6 +152,7 @@ PYTHON3_TOOLS = " \
     python3-dev \
     python3-asyncio-glib \
     python3-dill \
+    python3-bitstring \
     python3-pretty-j1939 \
     python3-pretty-j1587 \
     python3-py-hv-networks \

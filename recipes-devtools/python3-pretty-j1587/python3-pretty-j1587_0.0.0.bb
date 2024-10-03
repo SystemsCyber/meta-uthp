@@ -21,4 +21,3 @@ do_install() {
 }
 
 FILES:${PN} += "/opt/uthp/programs/pretty_j1587"
-

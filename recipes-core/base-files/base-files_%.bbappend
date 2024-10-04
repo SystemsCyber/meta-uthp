@@ -1,4 +1,5 @@
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
+FILESEXTRAPATHS:prepend := "/storage/J1939:"
 SRC_URI += "file://init-uthp.sh \
             file://motd \
             file://fstab \
@@ -9,7 +10,7 @@ SRC_URI += "file://init-uthp.sh \
             file://emmc-flasher \
             file://timesyncd.conf \
             file://fix-uthp \
-            file:///storage/J1939/J1939db.json \
+            file://J1939db.json \
             "
 
 do_install:append() {
@@ -27,8 +28,8 @@ do_install:append() {
     install -m 0644 ${WORKDIR}/.nanorc ${D}/home/uthp/.nanorc
 
     # J1939 Digital Annex
-    install -d ${D}/home/uthp/J1939
-    install -m 0644 ${WORKDIR}/J1939db.json ${D}/home/uthp/J1939/J1939db.json
+    install -d ${D}/opt/uthp/J1939
+    install -m 0644 ${WORKDIR}/J1939db.json ${D}/opt/uthp/J1939/J1939db.json
 
     # given that bash is the default shell, we need to install these files for root as well
     install -m 0644 ${WORKDIR}/.bashrc-root ${D}/root/.bashrc
@@ -46,15 +47,6 @@ do_install:append() {
     # install the fix-uthp script
     install -d ${D}/usr/bin
     install -m 0755 ${WORKDIR}/fix-uthp ${D}/usr/bin/fix-uthp
-
-    ### CanCatTCP ###
-    # TODO: need service file and enable CanCat to TCP connection
-    install -d ${D}/usr/bin
-    install -m 0755 ${WORKDIR}/CanCatTCP ${D}/usr/bin/CanCatTCP
-
-    # install the j1939 db
-    # install -d ${D}${sysconfdir}/J1939
-    # install -m 0644 ${WORKDIR}/J1939db.json ${D}${sysconfdir}/J1939/J1939db.json
 }
 
 RDEPENDS:${PN} += "bash python3 python3-core python3-pyserial"

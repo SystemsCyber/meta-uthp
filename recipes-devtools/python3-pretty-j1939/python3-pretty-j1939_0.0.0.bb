@@ -1,24 +1,22 @@
 DESCRIPTION = "python libs and scripts for pretty-printing J1939 logs"
 SECTION = "devel/python"
 LICENSE = "CLOSED"
-# LIC_FILES_CHKSUM = "file://${THISDIR}/LICENSE;md5=9cbb8e86b6798efc990e6ac9a33a8b14"
 
 # Specify the source file location
-#git://github.com/atlas0fd00m/CanCat.git
 SRC_URI = "git://github.com/nmfta-repo/pretty_j1939.git;protocol=https;rev=199431af9e837f299b171c5a71e3d051ad811e1b;branch=master"
 SRC_URI[sha256sum] = "7c72341c6e872d9b9e10a681d77a407e8e2cf4e1b88a315e24bd82a938496ad2"
 
 S = "${WORKDIR}/git"
 
-do_compile() {
-    :
-}
-
 do_install:append() {
-    install -d ${D}/home/uthp/pretty_j1939
-    cp -r ${S}/* ${D}/home/uthp/pretty_j1939
+    install -d ${D}/usr/bin
+    install -d ${D}/opt/uthp/programs/pretty_j1939
+    cp -r ${S}/* ${D}/opt/uthp/programs/pretty_j1939
+    
+    ln -s /opt/uthp/programs/pretty_j1939/pretty_j1939.py ${D}/usr/bin/pretty_j1939
+    chmod +x ${D}/opt/uthp/programs/pretty_j1939/pretty_j1939.py
 }
 
 RDEPENDS:${PN} += "python3-bitarray"
 
-FILES:${PN} += "/home/uthp/pretty_j1939/*"
+FILES:${PN} += "/opt/uthp/programs/pretty_j1939/*"

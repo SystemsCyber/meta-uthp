@@ -159,6 +159,7 @@ PYTHON3_TOOLS = " \
     plc4trucksduck \
     python3-can-isotp \
     python3-inputtimeout \
+    python3-platformdirs \
  "
 
 # TODO:

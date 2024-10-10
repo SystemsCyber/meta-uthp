@@ -6,3 +6,15 @@ SRC_URI = "git://github.com/TruckHacking/py-hv-networks.git;protocol=https;rev=5
 
 S = "${WORKDIR}/git"
 inherit setuptools3
+
+do_install(){
+    # install modules
+    install -d ${D}${PYTHON_SITEPACKAGES_DIR}
+    install -m 0644 -t ${D}${PYTHON_SITEPACKAGES_DIR} ${S}/hv_networks/*
+
+    # install scripts
+    install -d ${D}${bindir}
+    install -m 0755 ${S}/j1708dump.py ${D}${bindir}
+    install -m 0755 ${S}/j1708send.py ${D}${bindir}
+    install -m 0755 ${S}/test_j1587_driver.py ${D}${bindir}
+}

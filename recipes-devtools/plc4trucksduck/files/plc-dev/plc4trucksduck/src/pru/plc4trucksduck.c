@@ -20,7 +20,7 @@
 */
 
 #define PRU_NO 0
-#define BBB_GPIO_PIN 60
+#define BBB_GPIO_PIN 60 // IDLE LINE DETECT
 #define UART_NUM 4
 
 /* Host-0 Interrupt sets bit 30 in register R31 */
@@ -67,8 +67,6 @@
 #include <stddef.h>
 #include "intc_map_0.h"
 #include "common.h"
-
-// TODO: GPIO 60 used for idle line detect seems to stay high until I unplug the pins then it correctly performs high low detection.
 
 void main() {
     struct pru_rpmsg_transport transport;

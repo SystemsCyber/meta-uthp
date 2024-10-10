@@ -130,7 +130,7 @@ run_libcomposite () {
 			ln -s functions/ncm.usb0 configs/c.1/
 		fi
 
-		# Adding 3 ACM serial gadgets (usb0, usb1, usb2)
+		# Adding 4 ACM serial gadgets (usb0, usb1, usb2, usb3)
 		mkdir -p functions/acm.usb0
 		ln -s functions/acm.usb0 configs/c.1/
 
@@ -139,6 +139,9 @@ run_libcomposite () {
 
 		mkdir -p functions/acm.usb2
 		ln -s functions/acm.usb2 configs/c.1/
+
+		mkdir -p functions/acm.usb3
+		ln -s functions/acm.usb3 configs/c.1/
 
 		# Commented out mass storage gadget unless needed
 		# echo "${log} enable USB mass_storage img file"

@@ -1,0 +1,31 @@
+[Unit]
+Description=Serial Getty on ttyGS0
+Documentation=man:agetty(8) man:systemd-getty-generator(8)
+Documentation=http://0pointer.de/blog/projects/serial-console.html
+PartOf=dev-ttyGS0.device
+ConditionPathExists=/dev/ttyGS0
+After=dev-ttyGS0.device systemd-user-sessions.service plymouth-quit-wait.service getty-pre.target
+After=rc-local.service
+
+# Synchronize getty with getty.target during boot
+Before=getty.target
+IgnoreOnIsolate=yes
+
+Conflicts=rescue.service
+Before=rescue.service
+
+[Service]
+Environment="TERM=linux"
+ExecStart=-/sbin/agetty -8 -L ttyGS0 115200 $TERM
+Type=idle
+Restart=always
+UtmpIdentifier=ttyGS0
+TTYPath=/dev/ttyGS0
+TTYReset=yes
+TTYVHangup=yes
+KillMode=process
+IgnoreSIGPIPE=no
+SendSIGHUP=yes
+
+[Install]
+WantedBy=getty.target

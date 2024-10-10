@@ -160,6 +160,7 @@ PYTHON3_TOOLS = " \
     python3-can-isotp \
     python3-inputtimeout \
     python3-platformdirs \
+    python3-click \
  "
 
 # TODO:

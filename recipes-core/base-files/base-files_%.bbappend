@@ -1,5 +1,5 @@
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
-FILESEXTRAPATHS:prepend := "/storage/J1939:"
+FILESEXTRAPATHS:prepend := "/storage/standards:"
 SRC_URI += "file://init-uthp.sh \
             file://motd \
             file://fstab \
@@ -11,6 +11,8 @@ SRC_URI += "file://init-uthp.sh \
             file://timesyncd.conf \
             file://fix-uthp \
             file://J1939db.json \
+            file://J1708_201609.pdf.txt \
+            file://J1587_201301.pdf.txt \
             "
 
 do_install:append() {
@@ -27,9 +29,13 @@ do_install:append() {
     install -m 0644 ${WORKDIR}/.bash_profile ${D}/home/uthp/.bash_profile
     install -m 0644 ${WORKDIR}/.nanorc ${D}/home/uthp/.nanorc
 
-    # J1939 Digital Annex
+    # standards
     install -d ${D}/opt/uthp/J1939
     install -m 0644 ${WORKDIR}/J1939db.json ${D}/opt/uthp/J1939/J1939db.json
+    install -d ${D}/opt/uthp/J1708
+    install -m 0644 ${WORKDIR}/J1708_201609.pdf.txt ${D}/opt/uthp/J1708/J1708_201609.pdf.txt
+    install -d ${D}/opt/uthp/J1587
+    install -m 0644 ${WORKDIR}/J1587_201301.pdf.txt ${D}/opt/uthp/J1587/J1587_201301.pdf.txt
 
     # given that bash is the default shell, we need to install these files for root as well
     install -m 0644 ${WORKDIR}/.bashrc-root ${D}/root/.bashrc

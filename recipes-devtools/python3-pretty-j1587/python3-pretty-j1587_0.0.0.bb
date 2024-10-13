@@ -7,6 +7,10 @@ LIC_FILES_CHKSUM = "file://${THISDIR}/LICENSE;md5=9cbb8e86b6798efc990e6ac9a33a8b
 SRC_URI = "git://github.com/ainfosec/pretty_j1587.git;protocol=https;rev=31ac605d1c0dbcf4fde366e278d20382e3617476;branch=master"
 SRC_URI[sha256sum] = "7c72341c6e872d9b9e10a681d77a407e8e2cf4e1b88a315e24bd82a938496ad2"
 
+FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
+
+SRC_URI += "file://config.cfg"
+
 S = "${WORKDIR}/git"
 
 RDEPENDS:${PN} += "python3-core python3 python"
@@ -16,6 +20,7 @@ do_install() {
     install -d ${D}/usr/bin
 
     cp -r ${S}/* ${D}/opt/uthp/programs/pretty_j1587
+    install -m 0644 ${WORKDIR}/config.cfg ${D}/opt/uthp/programs/pretty_j1587
 
     ln -s /opt/uthp/programs/pretty_j1587/pretty_j1587.py ${D}/usr/bin/pretty_j1587
 }

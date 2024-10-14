@@ -5,6 +5,7 @@ SRC_URI = "file://serial-router \
            file://serial-router.service \
            file://serial-getty@ttyGS0.service \
            file://truck_devil_serial.c \
+           file://Makefile \
           "
 
 do_install() {
@@ -18,13 +19,14 @@ do_install() {
     install -m 0644 ${WORKDIR}/serial-getty@ttyGS0.service ${D}/${base_libdir}/systemd/system/
 
     # Install the truck_devil_serial.c
-    install -d ${D}/home/uthp/in-development/
-    install -m 0644 ${WORKDIR}/truck_devil_serial.c ${D}/home/uthp/in-development/
+    install -d ${D}/home/uthp/in-development/src/
+    install -m 0644 ${WORKDIR}/truck_devil_serial.c ${D}/home/uthp/in-development/src/
+    install -m 0644 ${WORKDIR}/Makefile ${D}/home/uthp/in-development/
 }
 
 FILES:${PN} += "${sysconfdir}/systemd/system/serial-router.service \
                 /usr/bin/serial-router \
-                /home/uthp/in-development/truck_devil_serial.c \
+                /home/uthp/in-development/ \
                "
 
 inherit systemd

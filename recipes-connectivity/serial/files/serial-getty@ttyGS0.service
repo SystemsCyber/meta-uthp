@@ -4,7 +4,7 @@ Documentation=man:agetty(8) man:systemd-getty-generator(8)
 Documentation=http://0pointer.de/blog/projects/serial-console.html
 PartOf=dev-ttyGS0.device
 ConditionPathExists=/dev/ttyGS0
-After=dev-ttyGS0.device systemd-user-sessions.service plymouth-quit-wait.service getty-pre.target
+After=bb-usb-gadgets.service dev-ttyGS0.device systemd-user-sessions.service plymouth-quit-wait.service getty-pre.target
 After=rc-local.service
 
 # Synchronize getty with getty.target during boot

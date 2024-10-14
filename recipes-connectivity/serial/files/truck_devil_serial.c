@@ -14,7 +14,6 @@
 #include <net/if.h>
 #include <ctype.h>
 
-// TODO: CLEANUP
 // TruckDevil serial interface
 #define SERIAL_PORT "/dev/ttyGS1"
 #define DEFAULT_CAN_INTERFACE "can0"
@@ -23,15 +22,7 @@
 int serial_fd = -1;
 int can_fd = -1;
 char can_interface[IFNAMSIZ] = DEFAULT_CAN_INTERFACE;
-int can_baud = 0; // 0 for auto-baud
-
-void cleanup(int signo) {
-    if (serial_fd > 0)
-        close(serial_fd);
-    if (can_fd > 0)
-        close(can_fd);
-    exit(0);
-}
+int can_baud = 0; // 0 for auto-baud on linux??? maybe idk
 
 void print_baud_rate(speed_t speed) {
     switch (speed) {
@@ -95,7 +86,7 @@ void configure_serial(int fd) {
 
     int modem_bits = TIOCM_DTR;
     ioctl(fd, TIOCMBIS, &modem_bits); 
-    printf("Configured serial port GS0 with the following settings:\n");
+    printf("Configured serial port GS1 with the following settings for the TruckDevil 😈:\n");
     print_baud_rate(BAUD_RATE);
     printf(tty.c_cflag & CS8 ? "Character size: 8 bits\n" : "Character size: not 8 bits lol\n");
     printf(tty.c_cflag & PARENB ? "Parity: Enabled\n" : "Parity: Disabled\n");
@@ -131,7 +122,6 @@ void initialize_can_interface() {
     char command[256];
     int ret;
 
-    // Validate CAN interface and baud rate
     if (!validate_can_interface(can_interface)) {
         fprintf(stderr, "Invalid CAN interface: %s\n", can_interface);
         exit(1);
@@ -142,7 +132,6 @@ void initialize_can_interface() {
         exit(1);
     }
 
-    // Bring down the CAN interface
     snprintf(command, sizeof(command), "ip link set %s down", can_interface);
     ret = system(command);
     if (ret != 0) {
@@ -150,11 +139,10 @@ void initialize_can_interface() {
         exit(1);
     }
 
-    // Bring up the CAN interface with the specified baud rate
     if (can_baud != 0) {
         snprintf(command, sizeof(command), "ip link set %s up type can bitrate %d", can_interface, can_baud);
     } else {
-        // If baud rate is 0, use a default baud rate or auto-baud if supported
+        // If baud rate is 0, use a default baud rate or auto-baud if supported???
         snprintf(command, sizeof(command), "ip link set %s up type can bitrate 250000", can_interface);
     }
     ret = system(command);
@@ -164,6 +152,7 @@ void initialize_can_interface() {
     }
 
     printf("Initialized CAN interface: %s with baud rate: %d\n", can_interface, can_baud);
+    fflush(stdout);
 }
 
 void handle_initialization_sequence() {
@@ -172,16 +161,14 @@ void handle_initialization_sequence() {
     char c;
 
     printf("Waiting for initialization sequence...\n");
-    tcflush(serial_fd, TCIFLUSH); // Flush input buffer
+    tcflush(serial_fd, TCIFLUSH);
 
-    // Wait for the '#' character
+    // '#' character
     while (1) {
         int n = read(serial_fd, &c, 1);
         if (n <= 0) {
-            // Read error or timeout
-            printf("Read error or timeout\n");
-            printf("Received initialization sequence: %s\n", buffer);
-            return;
+            // if n is less than or equal to 0, then there was an error reading from the serial port so we continue
+            continue;
         }
         if (c == '#') {
             break;
@@ -192,15 +179,11 @@ void handle_initialization_sequence() {
     while (idx < 11) {
         int n = read(serial_fd, &buffer[idx], 11 - idx);
         if (n <= 0) {
-            // Read error or timeout
-            printf("Read error or timeout\n");
-            return;
+            // if n is less than or equal to 0, then there was an error reading from the serial port so we continue
+            continue;
         }
         idx += n;
     }
-
-    printf("Received initialization sequence: %s\n", buffer);
-
     // Null-terminate the buffer
     buffer[11] = '\0';
 
@@ -213,9 +196,6 @@ void handle_initialization_sequence() {
     // Parse CAN channel
     strncpy(can_interface, &buffer[7], 4); // copy the last 4 bytes of the buffer to the can_interface
     can_interface[4] = '\0';
-
-    printf("Received initialization sequence: baud rate %d, interface %s\n", can_baud, can_interface);
-    fflush(stdout);
 
     // Initialize CAN interface accordingly
     initialize_can_interface();
@@ -264,11 +244,6 @@ int passFrameFromSerial(int serial_fd, struct can_frame *frame) {
             return -1;
         if (c == '$')
             break;
-        else if (c == '#') {
-            // Handle reinitialization
-            handle_initialization_sequence();
-            return -1;
-        }
     }
 
     // Read the rest of the message until end delimiter
@@ -279,7 +254,7 @@ int passFrameFromSerial(int serial_fd, struct can_frame *frame) {
         if (c == '*')
             break;
         message[idx++] = c;
-        if (idx >= sizeof(message) - 1)
+        if ((unsigned int)(idx) >= sizeof(message) - 1)
             return -1; // Message too long
     }
     message[idx] = '\0';
@@ -310,6 +285,17 @@ int passFrameFromSerial(int serial_fd, struct can_frame *frame) {
     return 0;
 }
 
+void cleanup(int sig) {
+    if (serial_fd >= 0) {
+        close(serial_fd);
+    }
+    if (can_fd >= 0) {
+        close(can_fd);
+    }
+    exit(sig);
+}
+
+
 int main() {
     struct sigaction sigact; // Signal handler
     struct sockaddr_can addr; // CAN socket address
@@ -333,7 +319,6 @@ int main() {
     }
     configure_serial(serial_fd);
 
-    // Handle initial initialization sequence from serial
     handle_initialization_sequence();
 
     // Open CAN socket
@@ -359,47 +344,49 @@ int main() {
 
     // Main loop
     while (1) {
-        FD_ZERO(&readfds);
-        FD_SET(serial_fd, &readfds);
-        FD_SET(can_fd, &readfds);
+        FD_ZERO(&readfds); // Clear the file descriptor set
+        FD_SET(serial_fd, &readfds); // Add serial port to set
+        FD_SET(can_fd, &readfds); // Add CAN socket to set
 
-        int max_fd = (serial_fd > can_fd) ? serial_fd : can_fd;
+        int max_fd = (serial_fd > can_fd) ? serial_fd : can_fd; // Find max file descriptor
 
-        ret = select(max_fd + 1, &readfds, NULL, NULL, NULL);
-        if (ret < 0) {
+        struct timeval timeout;
+        timeout.tv_sec = 0;
+        timeout.tv_usec = 500;  // Set select timeout to 500ms
+        ret = select(max_fd + 1, &readfds, NULL, NULL, &timeout); // wait for activity on fds (timeout after 500ms)
+        if (ret < 0) { 
             perror("select");
-            break;
+            // cleanup and exit
+            cleanup(1);
         }
 
         // Check for CAN messages to read
-        if (FD_ISSET(can_fd, &readfds)) {
-            ret = read(can_fd, &frame, sizeof(struct can_frame));
+        if (FD_ISSET(can_fd, &readfds)) { // Check if CAN socket is in the set
+            ret = read(can_fd, &frame, sizeof(struct can_frame)); // Read CAN frame
             if (ret < 0) {
                 perror("CAN read");
-                break;
-            } else if (ret == sizeof(struct can_frame)) {
+                cleanup(1);
+            } else if (ret == sizeof(struct can_frame)) { // If frame was read successfully
                 // Pass frame to serial
                 passFrameToSerial(serial_fd, &frame);
             }
         }
 
         // Check for serial data to read
-        if (FD_ISSET(serial_fd, &readfds)) {
-            struct can_frame outgoing;
-            memset(&outgoing, 0, sizeof(outgoing));
-            ret = passFrameFromSerial(serial_fd, &outgoing);
-            if (ret == 0) {
-                // Send frame to CAN bus
+        if (FD_ISSET(serial_fd, &readfds)) { // Check if serial port is in the set
+            struct can_frame outgoing; // Outgoing CAN frame
+            memset(&outgoing, 0, sizeof(outgoing)); // Clear the outgoing frame
+            ret = passFrameFromSerial(serial_fd, &outgoing); // Parse frame from serial
+            if (ret == 0) { // If frame was parsed successfully
+                // Send frame to CAN bus if valid
                 ret = write(can_fd, &outgoing, sizeof(struct can_frame));
                 if (ret < 0) {
                     perror("CAN write");
-                    break;
+                    cleanup(1);
                 }
             }
         }
     }
 
-    // Cleanup
-    cleanup(0);
     return 0;
 }

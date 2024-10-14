@@ -14,7 +14,6 @@ SRC_URI += "file://init-uthp.sh \
             file://J1708_201609.pdf.txt \
             file://J1587_201301.pdf.txt \
             file://rpds-py.sh \
-            file://default-user-perm.sh \
             "
 
 do_install:append() {

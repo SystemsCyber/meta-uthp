@@ -161,6 +161,7 @@ PYTHON3_TOOLS = " \
     python3-inputtimeout \
     python3-platformdirs \
     python3-click \
+    python3-rpds-py \
  "
 
 # TODO:
@@ -192,6 +193,11 @@ PYTHON3_TOOLS = " \
 
 ## core image
 # (check the fix-uthp script under base-files)
+## jupyter lab - NOTE Fixed                 
+# python3-rpds-py \ --> needs to be v0.2.0??? NOTE: Fixed
+## core image
+# fix uthp user home directory (not chowned by uthp) NOTE: Fixed
+# (check the fix-uthp script under base-files)
 # actually add license files to recipes to be compliant
 
 ## interesting tools we should add
@@ -217,10 +223,10 @@ PASS = '\$6\$kXDp5Q1Ki1mAOJ7U\$Bz7DjUHuRjnO/oPL6Xc3/TOiknek/eXiXIL8wiU00VpNJmd9d
 EXTRA_USERS_PARAMS = " \
     useradd -u 1000 -d /home/uthp -s /bin/bash -p '${PASS}' uthp; \
     usermod -aG sudo uthp; \
-	passwd-expire uthp; \
+    passwd-expire uthp; \
     usermod -s /bin/bash root; \
     usermod -p '${PASS}' root; \
-	passwd-expire root; \
+    passwd-expire root; \
 	"
 
 ROOTFS_POSTPROCESS_COMMAND += "update_sudoers;"

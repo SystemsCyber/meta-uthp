@@ -1,0 +1,12 @@
+[Unit]
+Description=TCP Routing
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/tcp-router
+Restart=on-failure
+User=root
+
+[Install]
+WantedBy=multi-user.target

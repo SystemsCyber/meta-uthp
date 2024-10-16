@@ -1,0 +1,11 @@
+[Unit]
+Description=PRU for Trucks Duck Service
+After=j17084truckduck.service plc4trucksduck.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'if ! grep -q BB-PLC4TRUCKSDUC /sys/devices/bone_capemgr.?/slots; then echo BB-PLC4TRUCKSDUC > /sys/devices/bone_capemgr.?/slots; sleep 1; fi'
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target

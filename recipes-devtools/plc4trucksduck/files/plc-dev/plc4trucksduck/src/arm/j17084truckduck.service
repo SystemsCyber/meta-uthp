@@ -1,0 +1,13 @@
+[Unit]
+Description=J17084 Truck Duck Service
+After=truck_duck_initialized.target
+Wants=truck_duck_initialized.target
+
+[Service]
+Environment=LD_LIBRARY_PATH=/usr/local/lib
+WorkingDirectory=/lib/firmware/
+ExecStart=/usr/bin/python3 /usr/local/bin/j17084truckduck_host.py
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

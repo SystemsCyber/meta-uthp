@@ -1,0 +1,11 @@
+include /usr/share/nano/*.nanorc
+set autoindent
+set linenumbers
+set titlecolor green
+set keycolor green
+set functioncolor green
+set numbercolor green
+# set mouse
+# set softwrap
+# set casesensitive
+# set smooth

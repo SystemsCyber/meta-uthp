@@ -1,0 +1,12 @@
+[Unit]
+Description=Serial Routing
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/serial-router
+Restart=on-failure
+User=root
+
+[Install]
+WantedBy=multi-user.target

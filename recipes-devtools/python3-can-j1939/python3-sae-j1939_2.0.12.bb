@@ -3,8 +3,6 @@ SECTION = "devel/python"
 LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://${THISDIR}/LICENSE;md5=9cbb8e86b6798efc990e6ac9a33a8b14"
 
-# Specify the source file location
-#git://github.com/atlas0fd00m/CanCat.git
 SRC_URI = "git://github.com/juergenH87/python-can-j1939.git;protocol=https;rev=df8f694aefa9581428d9d70cceff6c05df890fcb;branch=master"
 SRC_URI[sha256sum] = "7c72341c6e872d9b9e10a681d77a407e8e2cf4e1b88a315e24bd82a938496ad2"
 

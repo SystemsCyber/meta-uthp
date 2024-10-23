@@ -54,7 +54,7 @@
 
 // SSCP485 Datasheet recommended waiting about 1.5 characters of line idle to
 // determine that a message had been sent.
-#define CHECKS_TILL_MSG_FINISHED 13
+#define CHECKS_TILL_MSG_FINISHED 13 // 12 + 0.5 (1)
 
 //#define UART_TESTING // Remove if not testing UART
 
@@ -90,7 +90,7 @@ void main() {
                 // (no one else is talking) or greater than what we sent
                 // (arbitration win since we have a lower value). If so we
                 // continue talking, otherwise we backoff.
-                #ifdef UART_TESTING
+                #ifdef UART_TESTING // gets executed even if we aren't receiving anything
                 if (uartGetC(&receiveBuf[0]) && transmitBuf[0] > receiveBuf[0]) {
                     // We lost arbitration so read the remaining message.
                     uint16_t recvLen = receiveRemainingMessage(&receiveBuf[1]);

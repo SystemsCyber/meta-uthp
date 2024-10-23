@@ -59,54 +59,60 @@ all: $(PRU_BINS) $(DTB_OFILES)
 
 # Device tree compilation
 $(THIS_DTB_OFILE): $(THIS_DTS_SOURCE) | $(ARM_BUILD_DIR)
-	dtc -O dtb -I dts -o $@ -b 0 -@ $<
+        dtc -O dtb -I dts -o $@ -b 0 -@ $<
 
 # PRU compilation and linking
 $(J17084TRUCKDUCK_OFILE): $(J17084TRUCKDUCK_SOURCES) | $(PRU_GEN_DIR)
-	$(CLPRU) $(CFLAGS) $(INC) $^ --run_linker $(LFLAGS) $(LIBS) --output_file=$@ -m$(patsubst %.out,%.map,$@)
+        $(CLPRU) $(CFLAGS) $(INC) $^ --run_linker $(LFLAGS) $(LIBS) --output_file=$@ -m$(patsubst %.out,%.map,$@)
 
 $(PLC4TRUCKSDUCK_OFILE): $(PLC4TRUCKSDUCK_SOURCES) | $(PRU_GEN_DIR)
-	$(CLPRU) $(CFLAGS) $(INC) $^ --run_linker $(LFLAGS) $(LIBS) --output_file=$@ -m$(patsubst %.out,%.map,$@)
+        $(CLPRU) $(CFLAGS) $(INC) $^ --run_linker $(LFLAGS) $(LIBS) --output_file=$@ -m$(patsubst %.out,%.map,$@)
 
 # Directory creation
 $(ARM_BUILD_DIR):
-	mkdir -p $(ARM_BUILD_DIR)
+        mkdir -p $(ARM_BUILD_DIR)
 
 $(ARM_BUILD_DIR)/%.dtbo: $(ARM_SRC_DIR)/%.dts | $(ARM_BUILD_DIR)
-	dtc -O dtb -I dts -o $@ -b 0 -@ $<
+        dtc -O dtb -I dts -o $@ -b 0 -@ $<
 
 $(PRU_GEN_DIR):
-	mkdir -p $(PRU_GEN_DIR)
+        mkdir -p $(PRU_GEN_DIR)
 
 # Clean up
 clean:
-	rm -rf $(PRU_GEN_DIR) $(ARM_BUILD_DIR)
+        rm -rf $(PRU_GEN_DIR) $(ARM_BUILD_DIR)
 
 # Python code check
 check:
-	~/.local/bin/flake8 src/arm/*.py
+        ~/.local/bin/flake8 src/arm/*.py
 
 # Installation
 #install -m 755 $(ARM_SRC_DIR)/j1708send.py /usr/local/bin/ # TODO: Eventually
 #install -m 755 $(ARM_SRC_DIR)/j1708dump.py /usr/local/bin/ # TODO: Eventually
+#install -m 644 $(ARM_SRC_DIR)/j17084truckduck.service /etc/systemd/system/ # TODO: Eventually
+#install -m 644 $(ARM_SRC_DIR)/plc4trucksduck.service /etc/systemd/system/ # TODO: Eventually
+
+SHELL := /bin/bash
+
 install: $(DTB_OFILES)
-	install -d /etc/systemd/system
-	install -m 600 $(THIS_DTB_OFILE) /boot/p1/extlinux/
-	install -m 700 $(ARM_SRC_DIR)/j17084truckduck_host.py /usr/bin/
-	install -m 600 $(PRU_GEN_DIR)/j17084truckduck.out /lib/firmware/am335x-pru1-fw
-	install -m 644 $(ARM_SRC_DIR)/j17084truckduck.service /etc/systemd/system/
-	install -m 700 $(ARM_SRC_DIR)/plc4trucksduck_host.py /usr/bin/
-	install -m 600 $(PRU_GEN_DIR)/plc4trucksduck.out /lib/firmware/am335x-pru0-fw
-	install -m 644 $(ARM_SRC_DIR)/plc4trucksduck.service /etc/systemd/system/
-	install -m 644 $(ARM_SRC_DIR)/pru4trucksduck.service /etc/systemd/system/
-	chmod +x /usr/bin/plc4trucksduck_host.py
-	chmod +x /usr/bin/j17084truckduck_host.py
-	@echo NOTE /// You must reboot before you can load $(THIS_DTB_OFILE) ///
+        @echo "Stopping remote processors..."
+        ./stop_remoteproc
+        install -d /etc/systemd/system
+        install -m 600 $(THIS_DTB_OFILE) /boot/p1/extlinux/
+        install -m 700 $(ARM_SRC_DIR)/j17084truckduck_host.py /usr/bin/
+        install -m 600 $(PRU_GEN_DIR)/j17084truckduck.out /lib/firmware/am335x-pru1-fw
+        install -m 700 $(ARM_SRC_DIR)/plc4trucksduck_host.py /usr/bin/
+        install -m 600 $(PRU_GEN_DIR)/plc4trucksduck.out /lib/firmware/am335x-pru0-fw
+        install -m 644 $(ARM_SRC_DIR)/pru4trucksduck.service /etc/systemd/system/
+        chmod +x /usr/bin/plc4trucksduck_host.py
+        chmod +x /usr/bin/j17084truckduck_host.py
+        @echo NOTE /// You must reboot before you can load $(THIS_DTB_OFILE) ///
+
 
 .PHONY: all clean check install
 
 plc:
-	sudo /usr/bin/plc4trucksduck_host.py
+        sudo /usr/bin/plc4trucksduck_host.py
 
 j1708:
-	sudo /usr/bin/j17084truckduck_host.py
+        sudo /usr/bin/j17084truckduck_host.py

@@ -37,8 +37,6 @@ fi
 
 # Copy some specific .dtbo files to source directory
 cp /boot/dtb/BB-I2C1-MCP7940X-00A0.dtbo "$DTB_SOURCE_DIR"
-cp /boot/dtb/BB-UART4-00A0.dtbo "$DTB_SOURCE_DIR"
-cp /boot/dtb/BB-UART2-00A0.dtbo "$DTB_SOURCE_DIR"
 
 # Copy all *.dtbo files from source to destination directory
 cp "$DTB_SOURCE_DIR"*.dtbo "$EXTLINUX_DIR"

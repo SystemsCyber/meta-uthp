@@ -24,7 +24,7 @@ do_install:append() {
     install -m 0644 ${WORKDIR}/motd ${D}${sysconfdir}/motd
     install -m 0644 ${WORKDIR}/fstab ${D}${sysconfdir}/fstab
 
-    ### This section creates a symlink to support smooth installtion of rpds-py
+    ### This section creates a symlink to support smooth installtion of rpds-py (hacky way)
     # Install the rpds-py.sh script
     install -d ${D}${sysconfdir}/init.d
     install -d ${D}${sysconfdir}/rc3.d
@@ -34,13 +34,6 @@ do_install:append() {
     ln -sf ${sysconfdir}/init.d/rpds-py.sh ${D}${sysconfdir}/rc3.d/S99rpds-py
 
     ### ends here
-    
-    #### Change default user permissions
-    install -m 0755 ${WORKDIR}/default-user-perm.sh ${D}${sysconfdir}/init.d/default-user-perm.sh
-    # Create a symlink to ensure the script runs at startup
-    ln -sf ${sysconfdir}/init.d/default-user-perm.sh ${D}${sysconfdir}/rc3.d/S99default-user-perm
-    ###
-
 
     install -d ${D}/home/uthp
     install -d ${D}/root

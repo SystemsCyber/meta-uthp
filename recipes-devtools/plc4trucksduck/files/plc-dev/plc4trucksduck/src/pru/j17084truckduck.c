@@ -19,8 +19,10 @@
  * SOFTWARE.
  */
 
+// TESTED ON: 10/17/2024 - Working with UTHP 1.0.0
+
 #define PRU_NO 1
-#define BBB_GPIO_PIN 40
+#define BBB_GPIO_PIN 40 // fake ILD (not needed for J1708 over PLC.. this is over the THVD1410 transceiver)
 #define UART_NUM 2
 
 /* Host-0 Interrupt sets bit 31 in register R31 */
@@ -52,11 +54,10 @@
 #define CYCLES_PER_HALF_BIT 10400
 #define CHECKS_TILL_BUS_IDLE 20
 
-// SSCP485 Datasheet recommended waiting about 1.5 characters of line idle to
-// determine that a message had been sent.
-#define CHECKS_TILL_MSG_FINISHED 13
+#define CHECKS_TILL_MSG_FINISHED 30 // number of half bit intervals to wait (was 13)
 
 #define UART_TESTING // Remove if not testing UART
+// #define J1708_TESTING // Remove if not testing J1708 with THVD1410
 
 #include <stdint.h>
 #include <pru_cfg.h>
@@ -91,6 +92,9 @@ void main() {
                 if (uartGetC(&receiveBuf[0]) && transmitBuf[0] > receiveBuf[0]) {
                     // We lost arbitration so read the remaining message.
                     uint16_t recvLen = receiveRemainingMessage(&receiveBuf[1]);
+                    // send a debugging message to the host
+                    uint8_t debugMsg[1] = {0x11};
+                    pru_rpmsg_send(&transport, dst, src, debugMsg, 1);
                     pru_rpmsg_send(&transport, dst, src, receiveBuf, recvLen);
                 } else {
                     // Either no one else is talking or we won arbitration
@@ -101,8 +105,13 @@ void main() {
                 }
             }
         } else if (uartGetC(receiveBuf)) { // Is there anything to receive?
+            uint8_t debugMsg[1] = {0x22};
+            pru_rpmsg_send(&transport, dst, src, debugMsg, 1);
             uint16_t recvLen = receiveRemainingMessage(&receiveBuf[1]);
+            recvLen += 1; // add the MID
             pru_rpmsg_send(&transport, dst, src, receiveBuf, recvLen);
+            // clear receiveBuf so we know its been sent
+            memset(receiveBuf, 0, MAX_PAYLOAD_LEN);
         }
     }
 }

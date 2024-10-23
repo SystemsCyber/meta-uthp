@@ -73,17 +73,17 @@ void pruInit(struct pru_rpmsg_transport* transport) {
             i = 1;
             continue;
         }
-        __delay_cycles(CYCLES_PER_HALF_BIT);
+        __delay_cycles(CYCLES_PER_HALF_BIT); // wait for half bit (20 for j1708)
     }
     uartRead(receiveBuf, MAX_PAYLOAD_LEN); // Clear anything in RX FIFO
-    memset(receiveBuf, 0, MAX_PAYLOAD_LEN);
+    memset(receiveBuf, 0, MAX_PAYLOAD_LEN); // Clear the buffer
 }
 
 uint16_t receiveRemainingMessage(uint8_t* buf) {
     uint16_t i = 0;
-    for (; i < MAX_PAYLOAD_LEN; i++) {
+    for (; i < MAX_PAYLOAD_LEN; i++) { // Read until we get a bus idle
         uartGetC(&buf[i]);
-        if (isBusIdle(CHECKS_TILL_MSG_FINISHED)) {
+        if (isBusIdle(CHECKS_TILL_MSG_FINISHED)) { // if bus idle function returns 1 then break
             i++;
             break;
         }

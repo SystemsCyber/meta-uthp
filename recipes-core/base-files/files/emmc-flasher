@@ -103,11 +103,11 @@ write_failure () {
 format_partitions () {
     # Format the first partition
     echo "Formatting first partition"
-    umount /dev/${destination}p1; echo 'y' | mkfs.vfat -F 32 /dev/${destination}p1; flush_cache
+    umount /dev/${destination}p1 || true; echo 'y' | mkfs.vfat -F 32 /dev/${destination}p1; flush_cache
 
     # Format the second partition
     echo "Formatting second partition"
-    umount /dev/${destination}p2; echo 'y' | mkfs.ext4 /dev/${destination}p2; flush_cache
+    umount /dev/${destination}p2 || true; echo 'y' | mkfs.ext4 /dev/${destination}p2; flush_cache
 }
 
 copy_partitions () {
@@ -167,9 +167,9 @@ cylon_leds & CYLON_PID=$!
 # 2. erase emmc
 echo "==> Erasing eMMC"
 flush_cache
-dd if=/dev/zero of=${destination} bs=1M count=108
+dd if=/dev/zero of=/dev/${destination} bs=1M count=108
 sync
-dd if=${destination} of=/dev/null bs=1M count=108
+dd if=/dev/${destination} of=/dev/null bs=1M count=108
 sync
 flush_cache
 # 3. partition emmc

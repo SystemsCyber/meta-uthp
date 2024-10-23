@@ -7,10 +7,10 @@
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,6 +25,7 @@ import signal
 import socket
 import sys
 import time
+import fcntl  # Added import for fcntl module
 
 RPMSG_DEV = "/dev/rpmsg_pru31"  # RPMsg device file
 PAYLOAD_LEN = 255  # Must match the same in the PRU code
@@ -42,56 +43,72 @@ def signal_handler(sig, frame):
 def load_pru_firmware():
     """Load and start the PRU firmware using remoteproc."""
     # Stop the PRU if it's already running
-    with open(os.path.join(REMOTE_PROC_PATH, "state"), 'r+') as f:
-        if f.readline().strip() != "offline":
-            f.seek(0)
-            f.write("stop\n")
-            f.flush()
+    state_path = os.path.join(REMOTE_PROC_PATH, "state")
+    firmware_path = os.path.join(REMOTE_PROC_PATH, "firmware")
+    try:
+        with open(state_path, 'r') as f:
+            state = f.readline().strip()
+        if state != "offline":
+            with open(state_path, 'w') as f:
+                f.write("stop\n")
+                f.flush()
+    except IOError as e:
+        print(f"Error stopping PRU: {e}")
+        sys.exit(1)
 
     # Set the PRU firmware
-    with open(os.path.join(REMOTE_PROC_PATH, "firmware"), 'w') as f:
-        f.write(os.path.basename(PRU_FW_PATH) + '\n')
+    try:
+        with open(firmware_path, 'w') as f:
+            f.write(os.path.basename(PRU_FW_PATH) + '\n')
+    except IOError as e:
+        print(f"Error setting PRU firmware: {e}")
+        sys.exit(1)
 
     # Start the PRU
-    with open(os.path.join(REMOTE_PROC_PATH, "state"), 'w') as f:
-        f.write("start\n")
+    try:
+        with open(state_path, 'w') as f:
+            f.write("start\n")
+    except IOError as e:
+        print(f"Error starting PRU: {e}")
+        sys.exit(1)
 
     print("PRU firmware loaded and started")
-    
 
 def forward(sock):
     global running
     try:
-        rpmsg = open(RPMSG_DEV, 'r+b', buffering=0)
-        rpmsg.write(b'00')
+        rpmsg = open(RPMSG_DEV, 'rb')  # Open in binary read mode
     except IOError as e:
-        print(e)
+        print(f"Error opening RPMsg device: {e}")
         sock.close()
         sys.exit(1)
 
+    # Set up epoll
     epoll = select.epoll()
-    epoll.register(rpmsg, select.EPOLLIN)
+    epoll.register(rpmsg.fileno(), select.EPOLLIN)
     epoll.register(sock.fileno(), select.EPOLLIN)
-    
+
     try:
         while running:
             events = epoll.poll(1)
             for fileno, event in events:
-                if (fileno == rpmsg.fileno()) and (event & select.EPOLLIN):
+                if fileno == rpmsg.fileno():
                     data = rpmsg.read(PAYLOAD_LEN)
                     if data:
                         sock.sendto(data, ('localhost', UDP_PORTS[1]))
-                        print("Received from PRU:", data.strip())
-                elif (fileno == sock.fileno()) and (event & select.EPOLLIN):
+                        print("Received from PRU:", data.hex())
+                        print(time.time())
+                elif fileno == sock.fileno():
                     frame = sock.recv(PAYLOAD_LEN)
                     rpmsg.write(frame[:PAYLOAD_LEN])
-                    print("Sent to PRU:", frame)
+                    print("Sent to PRU:", frame.hex())
     finally:
-        epoll.unregister(rpmsg)
+        epoll.unregister(rpmsg.fileno())
         epoll.unregister(sock.fileno())
         epoll.close()
         rpmsg.close()
         sock.close()
+
 
 if __name__ == "__main__":
     # Register the signal handler for SIGINT
@@ -104,7 +121,7 @@ if __name__ == "__main__":
         # Load and start the PRU firmware
         load_pru_firmware()
     except OSError as e:
-        print(e)
+        print(f"Socket or PRU error: {e}")
         sys.exit(-1)
-    time.sleep(1) # Give time for file creation
+    time.sleep(1)  # Give time for file creation
     forward(sock)

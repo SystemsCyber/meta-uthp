@@ -54,7 +54,7 @@
 #define CYCLES_PER_HALF_BIT 10400
 #define CHECKS_TILL_BUS_IDLE 20
 
-#define CHECKS_TILL_MSG_FINISHED 30 // number of half bit intervals to wait (was 13)
+#define CHECKS_TILL_MSG_FINISHED 11 // number of half bit intervals to wait (was 13)
 
 #define UART_TESTING // Remove if not testing UART
 // #define J1708_TESTING // Remove if not testing J1708 with THVD1410
@@ -82,6 +82,9 @@ void main() {
     while (1) {
         // Is there a message to transmit?
         if (transmitBuf[0] != 0 || pru_rpmsg_receive(&transport, &src, &dst, transmitBuf, &len) == PRU_RPMSG_SUCCESS) {
+            // send a transmit debug message to the host
+            uint8_t debugMsg[1] = {0x11};
+            pru_rpmsg_send(&transport, dst, src, debugMsg, 1);
             if (isBusIdle(CHECKS_TILL_BUS_IDLE)) {
                 // Send MID. Using uartWrite over uartPutC so that it waits to
                 // return until byte is transmitted.
@@ -93,8 +96,8 @@ void main() {
                     // We lost arbitration so read the remaining message.
                     uint16_t recvLen = receiveRemainingMessage(&receiveBuf[1]);
                     // send a debugging message to the host
-                    uint8_t debugMsg[1] = {0x11};
-                    pru_rpmsg_send(&transport, dst, src, debugMsg, 1);
+                    // uint8_t debugMsg[1] = {0x11};
+                    // pru_rpmsg_send(&transport, dst, src, debugMsg, 1);
                     pru_rpmsg_send(&transport, dst, src, receiveBuf, recvLen);
                 } else {
                     // Either no one else is talking or we won arbitration
@@ -105,10 +108,12 @@ void main() {
                 }
             }
         } else if (uartGetC(receiveBuf)) { // Is there anything to receive?
-            uint8_t debugMsg[1] = {0x22};
-            pru_rpmsg_send(&transport, dst, src, debugMsg, 1);
+            // uint8_t debugMsg[1] = {0x22};
+            // pru_rpmsg_send(&transport, dst, src, debugMsg, 1);
             uint16_t recvLen = receiveRemainingMessage(&receiveBuf[1]);
-            recvLen += 1; // add the MID
+            recvLen += 1; // add the last byte
+            // uint8_t debugMsg[2] = {recvLen & 0xFF, (recvLen >> 8) & 0xFF}; // store recvLen as two bytes            
+            // pru_rpmsg_send(&transport, dst, src, debugMsg, 2);
             pru_rpmsg_send(&transport, dst, src, receiveBuf, recvLen);
             // clear receiveBuf so we know its been sent
             memset(receiveBuf, 0, MAX_PAYLOAD_LEN);

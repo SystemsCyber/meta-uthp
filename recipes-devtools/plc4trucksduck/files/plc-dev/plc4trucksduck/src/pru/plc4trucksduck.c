@@ -20,7 +20,7 @@
 */
 
 #define PRU_NO 0
-#define BBB_GPIO_PIN 60 // IDLE LINE DETECT
+#define BBB_GPIO_PIN 60 // IDLE LINE DETECT: TODO: Test this
 #define UART_NUM 4
 
 /* Host-0 Interrupt sets bit 30 in register R31 */

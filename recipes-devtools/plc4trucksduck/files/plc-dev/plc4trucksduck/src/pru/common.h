@@ -27,18 +27,21 @@ uint8_t transmitBuf[RPMSG_MESSAGE_SIZE];
 uint8_t receiveBuf[MAX_PAYLOAD_LEN];
 
 int __inline isBusIdle(uint8_t numChecks) {
-    for (int i = 0; i < numChecks; ++i) {
-        #ifdef UART_TESTING
-        if (readGpioPin(BBB_GPIO_PIN) == 1) {
-        #else
-        if (readGpioPin(BBB_GPIO_PIN) == 0) {
-        #endif
-            return 0;
-        } else {
-            __delay_cycles(CYCLES_PER_HALF_BIT);
+    // Number of passes needed to achieve ~5.2 ms idle time
+    // Each pass of isBusIdle(20) checks for ~1.04 ms
+    // Thus, we need 5 passes: 5 * 1.04 ms ≈ 5.2 ms
+    int required_passes = 5;
+    
+    for(int pass = 0; pass < required_passes; pass++) {
+        for(int i = 0; i < numChecks; i++) {
+            if(UART_LSR & 0x1) { // Data Ready bit is set
+                // Bus is active, reset idle detection
+                return 0; // Bus is not idle
+            }
+            __delay_cycles(CYCLES_PER_HALF_BIT); // Wait for half bit time (~52 µs)
         }
     }
-    return 1;
+    return 1; // Bus has been idle for the required duration
 }
 
 void pruInit(struct pru_rpmsg_transport* transport) {
@@ -64,23 +67,23 @@ void pruInit(struct pru_rpmsg_transport* transport) {
     gpioInit();
 
     // Wait for message to finish
-    for (int i = 1; i < CHECKS_TILL_MSG_FINISHED; ++i) {
-        #ifdef UART_TESTING
-        if (readGpioPin(BBB_GPIO_PIN)) {
-        #else
-        if (!readGpioPin(BBB_GPIO_PIN)) {
-        #endif
-            i = 1;
-            continue;
-        }
-        __delay_cycles(CYCLES_PER_HALF_BIT); // wait for half bit (20 for j1708)
-    }
+    // for (int i = 1; i < CHECKS_TILL_MSG_FINISHED; ++i) {
+    //     #ifdef UART_TESTING
+    //     if (readGpioPin(BBB_GPIO_PIN)) {
+    //     #else
+    //     if (!readGpioPin(BBB_GPIO_PIN)) {
+    //     #endif
+    //         i = 1;
+    //         continue;
+    //     }
+    //     __delay_cycles(CYCLES_PER_HALF_BIT); // wait for half bit (20 for j1708)
+    // }
     uartRead(receiveBuf, MAX_PAYLOAD_LEN); // Clear anything in RX FIFO
     memset(receiveBuf, 0, MAX_PAYLOAD_LEN); // Clear the buffer
 }
-
-uint16_t receiveRemainingMessage(uint8_t* buf) {
-    uint16_t i = 0;
+//uartGetC(&buf[i]);
+int16_t receiveRemainingMessage(uint8_t* buf) {
+    int16_t i = -1; // include the first byte
     for (; i < MAX_PAYLOAD_LEN; i++) { // Read until we get a bus idle
         uartGetC(&buf[i]);
         if (isBusIdle(CHECKS_TILL_MSG_FINISHED)) { // if bus idle function returns 1 then break

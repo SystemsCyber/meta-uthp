@@ -33,143 +33,112 @@ PAYLOAD_LEN = 255  # Must match the same in the PRU code
 PRU_FW_PATH = "/lib/firmware/am335x-pru0-fw"  # Path to PRU firmware
 REMOTE_PROC_PATH = "/sys/class/remoteproc/remoteproc1"  # Path to remoteproc interface for PRU0
 
-# Initialize logging to the file plc.log
-logging.basicConfig(filename='plc.log', level=logging.DEBUG, format='%(asctime)s %(message)s')
-
-UDP_PORTS = (6971, 6972)
-running = True
+UDP_PORTS = (6969, 6970)
+running_plc = True
 
 def signal_handler(sig, frame):
     global running
     print("Signal received, exiting...")
-    running = False
-    stop_event.set()
+    running_plc = False
 
 def load_pru_firmware():
     """Load and start the PRU firmware using remoteproc."""
-    # stop the PRU if it's running
-    with open(os.path.join(REMOTE_PROC_PATH, "state"), 'r+') as f:
-        if f.readline().strip() != "offline":
-            f.seek(0)
-            f.write("stop\n")
-            f.flush()
+    state_path = os.path.join(REMOTE_PROC_PATH, "state")
+    firmware_path = os.path.join(REMOTE_PROC_PATH, "firmware")
 
-    # Load the PRU firmware
-    with open(os.path.join(REMOTE_PROC_PATH, "firmware"), 'w') as f:
-        f.write(os.path.basename(PRU_FW_PATH) + '\n')
+    # Stop the PRU if it's already running
+    try:
+        with open(state_path, 'r') as f:
+            state = f.readline().strip()
+        if state != "offline":
+            with open(state_path, 'w') as f:
+                f.write("stop\n")
+                f.flush()
+    except IOError as e:
+        print(f"Error stopping PRU: {e}")
+        sys.exit(1)
+
+    # Set the PRU firmware
+    try:
+        with open(firmware_path, 'w') as f:
+            f.write(os.path.basename(PRU_FW_PATH) + '\n')
+    except IOError as e:
+        print(f"Error setting PRU firmware: {e}")
+        sys.exit(1)
 
     # Start the PRU
-    with open(os.path.join(REMOTE_PROC_PATH, "state"), 'w') as f:
-        f.write("start\n")
+    try:
+        with open(state_path, 'w') as f:
+            f.write("start\n")
+    except IOError as e:
+        print(f"Error starting PRU: {e}")
+        sys.exit(1)
 
     print("PRU firmware loaded and started")
 
-def format_data(data):
-    """Format the data received from the PRU."""
-    # format as a single line of hex
-    formatted_data = data.hex()
-    logging.info(formatted_data)
-
-def logging_t(rpmsg, sock, stop_event, rpmsg_lock):
-    """Thread to read data from rpmsg and log it."""
-    epoll = select.epoll()
-    epoll.register(rpmsg, select.EPOLLIN)
-    epoll.register(sock.fileno(), select.EPOLLIN)
-
-    data_buffer = b''  # Buffer to store incoming data
-
-    try:
-        while not stop_event.is_set():
-            events = epoll.poll(1)
-            for fileno, event in events:
-                if (fileno == rpmsg.fileno()) and (event & select.EPOLLIN):
-                    with rpmsg_lock:
-                        data = rpmsg.read(1024)  # Read up to 1024 bytes
-                    if data:
-                        data_buffer += data
-                        # Process data in chunks of 10 bytes
-                        while len(data_buffer) >= 10:
-                            chunk = data_buffer[:10]
-                            data_buffer = data_buffer[10:]
-                            # TODO: test this implementation
-                            sock.sendto(chunk, ('localhost', UDP_PORTS[1]))
-                            format_data(chunk)
-                elif (fileno == sock.fileno()) and (event & select.EPOLLIN):
-                    frame = sock.recv(1024)
-                    with rpmsg_lock:
-                        rpmsg.write(frame[:PAYLOAD_LEN])
-                    logging.info("Sent to PRU: " + frame.hex())
-    finally:
-        epoll.unregister(rpmsg)
-        epoll.unregister(sock.fileno())
-        epoll.close()
-    print("Logging thread exiting")
-
-def input_t(rpmsg, stop_event, rpmsg_lock):
-    """Thread to read user input and send to rpmsg."""
-    while not stop_event.is_set():
+def read_from_pru(rpmsg, sock):
+    global running_plc
+    while running_plc:
         try:
-            user_input = input("Enter data to send to PRU (type 'exit' to quit): ")
-            if user_input.lower() in ('exit', 'quit'):
-                stop_event.set()
-                break
-            
-            data = user_input.encode('utf-8')
-            # send the first byte
-            with rpmsg_lock:
-                rpmsg.write(data[0:1])
-            time.sleep(0.00194) # timing / response needs to be handled in the PRU. this works for now
-            # send the rest of the bytes
-            with rpmsg_lock:
-                rpmsg.write(data[1:])
-
-            # Convert user_input to bytes, ensure it's the correct length
-            # if len(data) > PAYLOAD_LEN:
-            #     data = data[:PAYLOAD_LEN]
-            # elif len(data) < PAYLOAD_LEN:
-            #     data = data.ljust(PAYLOAD_LEN, b'\0')
-            # with rpmsg_lock:
-            #     rpmsg.write(data)
-            logging.info("Sent to PRU from input: " + data.hex())
-        except EOFError:
-            stop_event.set()
+            data = rpmsg.read(PAYLOAD_LEN)
+            if data:
+                sock.sendto(data, ('localhost', UDP_PORTS[1]))
+                print("Received from PRU:", data.hex())
+                print(time.time())
+        except IOError as e:
+            print(f"Error reading from RPMsg: {e}")
             break
-    print("Input thread exiting")
+
+def write_to_pru(rpmsg, sock):
+    global running_plc
+    while running_plc:
+        try:
+            frame = sock.recv(PAYLOAD_LEN)
+            rpmsg.write(frame[:PAYLOAD_LEN])
+            print("Sent to PRU:", frame.hex())
+            print(time.time())
+        except IOError as e:
+            print(f"Error writing to RPMsg: {e}")
+            break
 
 if __name__ == "__main__":
     # Register the signal handler for SIGINT
     signal.signal(signal.SIGINT, signal_handler)
+    
     sock = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
-    stop_event = threading.Event()
 
     try:
-        sock.bind(('localhost', UDP_PORTS[0]))
+        # Bind the socket to receive UDP data
+        sock.bind(('0.0.0.0', UDP_PORTS[0]))
         sock.setblocking(False)
+        
         # Load and start the PRU firmware
         load_pru_firmware()
     except OSError as e:
-        print(e)
+        print(f"Socket or PRU error: {e}")
         sys.exit(-1)
-    time.sleep(1)  # wait for the PRU to start
+
+    time.sleep(1)  # Give time for RPMsg device creation
 
     try:
-        rpmsg = open(RPMSG_DEV, 'r+b', buffering=0)
-        # rpmsg.write(b'00') # send a dummy byte
+        # Open the RPMsg device for both reading and writing
+        rpmsg = open(RPMSG_DEV, 'rb+')  # Open in read/write binary mode
     except IOError as e:
-        print(e)
+        print(f"Error opening RPMsg device: {e}")
         sock.close()
         sys.exit(1)
 
-    rpmsg_lock = threading.Lock()
-    logging_thread = threading.Thread(target=logging_t, args=(rpmsg, sock, stop_event, rpmsg_lock))
-    input_thread = threading.Thread(target=input_t, args=(rpmsg, stop_event, rpmsg_lock))
+    # Create and start threads for reading from and writing to PRU
+    read_thread = threading.Thread(target=read_from_pru, args=(rpmsg, sock))
+    write_thread = threading.Thread(target=write_to_pru, args=(rpmsg, sock))
 
-    # start
-    logging_thread.start()
-    input_thread.start()
+    read_thread.start()
+    write_thread.start()
 
-    # stop
-    logging_thread.join()
-    input_thread.join()
+    # Wait for both threads to complete (until SIGINT is received)
+    read_thread.join()
+    write_thread.join()
+
+    # Clean up after threads finish
     rpmsg.close()
     sock.close()

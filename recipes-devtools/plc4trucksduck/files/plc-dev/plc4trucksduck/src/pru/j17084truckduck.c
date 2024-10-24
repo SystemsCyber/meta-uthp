@@ -1,4 +1,4 @@
-/* PLC4TRUCKSDuck (c) 2020 National Motor Freight Traffic Association
+/* PLC4TRUCKSDuck (c) 2024 National Motor Freight Traffic Association
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,7 @@
 // TESTED ON: 10/17/2024 - Working with UTHP 1.0.0
 
 #define PRU_NO 1
-#define BBB_GPIO_PIN 40 // fake ILD (not needed for J1708 over PLC.. this is over the THVD1410 transceiver)
+// #define BBB_GPIO_PIN 40 // fake ILD (not needed for J1708 over PLC.. this is over the THVD1410 transceiver)
 #define UART_NUM 2
 
 /* Host-0 Interrupt sets bit 31 in register R31 */
@@ -44,20 +44,22 @@
 #define CHAN_PORT			31
 
 /* J1708 requires 10 bits of interframe spacing. J1708 also operates at 9600
- * baud and the clock rate of the PRUs is 200MHz. Also the line is active when
+ * baud and the clock rate of the PRUs is 200MHz (5ns clock cycle). Also the line is active when
  * its low (digital zero). Thus:
  * bit_time = 1/9600 = 1.04e-4
  * time_for_10_bits = 10 * bit_time
  * num_clock_cycles_for_10_bits = time_for_10_bits * 200000000 ~= 208,000
  * Therefore, the code below is checking if the bus is available every half bit.
  */
-#define CYCLES_PER_HALF_BIT 10400
-#define CHECKS_TILL_BUS_IDLE 20
+#define CYCLES_PER_HALF_BIT 10400 // 52 µs = 10400 * 5ns
+#define CHECKS_TILL_BUS_IDLE 20 // 20 * 52 µs = 1.04 ms (J1708 requires 10 bits of interframe spacing)
+/* Bus access time:
+    The bus access time is the shortest idle time plus twice the message's priority. 
+    The idle time must be at least 10 bit times. Thus the checks till message finished is 
+*/
+#define CHECKS_TILL_MSG_FINISHED 11 // 11 * 52 µs = 572 µs (10 bits of interframe spacing + 1 bit of message priority)?
 
-#define CHECKS_TILL_MSG_FINISHED 11 // number of half bit intervals to wait (was 13)
-
-#define UART_TESTING // Remove if not testing UART
-// #define J1708_TESTING // Remove if not testing J1708 with THVD1410
+#define J1708 // needed in common.h
 
 #include <stdint.h>
 #include <pru_cfg.h>

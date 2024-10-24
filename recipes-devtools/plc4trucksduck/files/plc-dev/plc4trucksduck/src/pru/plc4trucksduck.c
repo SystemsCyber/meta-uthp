@@ -1,4 +1,4 @@
-/* PLC4TRUCKSDuck (c) 2020 National Motor Freight Traffic Association
+/* PLC4TRUCKSDuck (c) 2024 National Motor Freight Traffic Association
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -54,9 +54,10 @@
 
 // SSCP485 Datasheet recommended waiting about 1.5 characters of line idle to
 // determine that a message had been sent.
-#define CHECKS_TILL_MSG_FINISHED 13 // 12 + 0.5 (1)
+#define CHECKS_TILL_MSG_FINISHED 13 // 13 * 52 µs = 676 µs
 
 //#define UART_TESTING // Remove if not testing UART
+#define PLC // needed in common.h
 
 #include <stdint.h>
 #include <pru_cfg.h>

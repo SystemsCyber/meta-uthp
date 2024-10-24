@@ -55,8 +55,6 @@
 // SSCP485 Datasheet recommended waiting about 1.5 characters of line idle to
 // determine that a message had been sent.
 #define CHECKS_TILL_MSG_FINISHED 13 // 13 * 52 µs = 676 µs
-
-//#define UART_TESTING // Remove if not testing UART
 #define PLC // needed in common.h
 
 #include <stdint.h>
@@ -91,19 +89,6 @@ void main() {
                 // (no one else is talking) or greater than what we sent
                 // (arbitration win since we have a lower value). If so we
                 // continue talking, otherwise we backoff.
-                #ifdef UART_TESTING // gets executed even if we aren't receiving anything
-                if (uartGetC(&receiveBuf[0]) && transmitBuf[0] > receiveBuf[0]) {
-                    // We lost arbitration so read the remaining message.
-                    uint16_t recvLen = receiveRemainingMessage(&receiveBuf[1]);
-                    pru_rpmsg_send(&transport, dst, src, receiveBuf, recvLen);
-                } else {
-                    // Either no one else is talking or we won arbitration
-                    // uartWrite will only return once all bytes have been sent.
-                    uartWrite(transmitBuf + 1, len - 1);
-                    // Clear transmitBuf so we know its been sent
-                    memset(transmitBuf, 0, RPMSG_MESSAGE_SIZE);
-                }
-                #else
                 if (uartGetC(&receiveBuf[0])) {
                     if (transmitBuf[0] <= receiveBuf[0]) {
                         // Either no one else is talking or we won arbitration
@@ -114,17 +99,19 @@ void main() {
                     } else {
                         // We lost arbitration so read the remaining message.
                         uint16_t recvLen = receiveRemainingMessage(&receiveBuf[1]);
+                        recvLen += 1; // add the last byte
                         pru_rpmsg_send(&transport, dst, src, receiveBuf, recvLen);
                     }
                 } else {
                     // Error - the P485 chip should echo first char back
                     __halt();
                 }
-                #endif
             }
         } else if (uartGetC(receiveBuf)) { // Is there anything to receive?
             uint16_t recvLen = receiveRemainingMessage(&receiveBuf[1]);
+            recvLen += 1; // add the last byte
             pru_rpmsg_send(&transport, dst, src, receiveBuf, recvLen);
+            memset(receiveBuf, 0, MAX_PAYLOAD_LEN);
         }
     }
 }

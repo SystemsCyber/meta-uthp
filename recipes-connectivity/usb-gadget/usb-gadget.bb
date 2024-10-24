@@ -25,8 +25,8 @@ do_install() {
     install -m 0755 ${WORKDIR}/bb-boot ${D}/etc/default/
     
     # install bbb.io recursively
-    install -d ${D}/bbb.io/
-    cp -r ${WORKDIR}/bbb.io/* ${D}/bbb.io/
+    install -d ${D}/etc/bbb.io/
+    cp -r ${WORKDIR}/bbb.io/* ${D}/etc/bbb.io/
 }
 
 FILES:${PN} += "*"

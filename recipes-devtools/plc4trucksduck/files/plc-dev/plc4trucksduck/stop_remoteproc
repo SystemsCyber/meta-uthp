@@ -1,0 +1,25 @@
+#!/bin/bash -e
+
+if [ -e /sys/class/remoteproc/remoteproc1/state ]; then
+    state=$(cat /sys/class/remoteproc/remoteproc1/state)
+    if [ "$state" = "running" ]; then
+        echo "stop" > /sys/class/remoteproc/remoteproc1/state
+        echo "remoteproc1 stopped."
+    else
+        echo "remoteproc1 is already stopped or not running."
+    fi
+else
+    echo "remoteproc1 not found."
+fi
+
+if [ -e /sys/class/remoteproc/remoteproc2/state ]; then
+    state=$(cat /sys/class/remoteproc/remoteproc2/state)
+    if [ "$state" = "running" ]; then
+        echo "stop" > /sys/class/remoteproc/remoteproc2/state
+        echo "remoteproc2 stopped."
+    else
+        echo "remoteproc2 is already stopped or not running."
+    fi
+else
+    echo "remoteproc2 not found."
+fi

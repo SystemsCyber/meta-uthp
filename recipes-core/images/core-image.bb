@@ -22,10 +22,14 @@ CORE_OS = " \
     safe-shutdown \
     locale-base-en-us \
     locale-base-en-gb \
+    uthp-serial-services \
+    uthp-tcp-services \
  "
 
 KERNEL_EXTRA_INSTALL = " \
+    kernel-dev \
     kernel-modules \
+    linux-libc-headers-dev \
     kernel-devsrc \
     uthp-devicetrees \
  "
@@ -52,6 +56,14 @@ DEV_SDK_INSTALL = " \
     make \
     perl-modules \
     pkgconfig \
+    bbb-pin-utils \
+    tzdata \
+    libxml2-dev \
+    libnl \
+    libnl-dev \
+    pru-icss \
+    ti-cgt-pru \
+    screen \
  "
 # need rsync to get the files from the host to the target for apt-keys at least
 
@@ -102,6 +114,7 @@ CAN_TOOLS = " \
     can2 \
     truckdevil \
     cannelloni \
+    cannelloni-server \
  "
 # deleted config-pin
 PREFERRED_VERSION_python = "2.7"
@@ -124,6 +137,7 @@ PYTHON3_TOOLS = " \
     packagegroup-python3-jupyter \
     python3-scapy \
     python3-can \
+    python3-cmap \
     python3-cantools \
     python3-six \
     python3-cancat \
@@ -142,23 +156,52 @@ PYTHON3_TOOLS = " \
     python3-pretty-j1939 \
     python3-pretty-j1587 \
     python3-py-hv-networks \
+    plc4trucksduck \
+    python3-can-isotp \
+    python3-inputtimeout \
+    python3-platformdirs \
+    python3-click \
+    python3-rpds-py \
  "
+
 # TODO:
-## misc.
+
+## Tools we still need to add / test
 # python3-pretty-j1939 --> add json files dynamically from our local storage
 # python3-pretty-j1587 --> add json files dynamically from our local storage
 # plc4trucksduck --> Test the firmware on the Yocto distro
 # python3-py-hv-networks
+# cmap
+# cannelloni-server
+
+## Tools we need to port
+# CanCat --> needs to be ported to SocketCAN
+
+## Tools we need to expose over serial
+# Expose CanCat encoding for use by CanCat
+# Expose GRIMMs j1708 encoding for use by GRIMMs tools
+# Exopose Truck Devil 'serial stuff' for use by Truck Devil
+
+## Tools we need to expose over TCP/UDP
+# Expose the py-hv-networks j1708 udp server (already done pretty much)
+# Expose M2 CAN encoding over TCP socket and add Truck Devil 'serial stuff'
+# Expose CanCat encoding over TCP socket and add TCP support to CanCat
+# Expose GRIMMs j1708 encoding over TCP socket and add TCP supprot to GRIMMs tools
+
 ## jupyter lab
 # python3-rpds-py \ --> needs to be v0.2.0???
+
 ## core image
-# fix uthp user home directory (not chowned by uthp)
+# (check the fix-uthp script under base-files)
+## jupyter lab - NOTE Fixed                 
+# python3-rpds-py \ --> needs to be v0.2.0??? NOTE: Fixed
+## core image
+# fix uthp user home directory (not chowned by uthp) NOTE: Fixed
+# (check the fix-uthp script under base-files)
 # actually add license files to recipes to be compliant
-## kernel
-# add cmap and build can-isotp into the kernel
+
 ## interesting tools we should add
 # https://github.com/coder/code-server/
-# https://github.com/mvduin/bbb-pin-utils/
 
 
 IMAGE_INSTALL += " \
@@ -180,10 +223,10 @@ PASS = '\$6\$kXDp5Q1Ki1mAOJ7U\$Bz7DjUHuRjnO/oPL6Xc3/TOiknek/eXiXIL8wiU00VpNJmd9d
 EXTRA_USERS_PARAMS = " \
     useradd -u 1000 -d /home/uthp -s /bin/bash -p '${PASS}' uthp; \
     usermod -aG sudo uthp; \
-	passwd-expire uthp; \
+    passwd-expire uthp; \
     usermod -s /bin/bash root; \
     usermod -p '${PASS}' root; \
-	passwd-expire root; \
+    passwd-expire root; \
 	"
 
 ROOTFS_POSTPROCESS_COMMAND += "update_sudoers;"

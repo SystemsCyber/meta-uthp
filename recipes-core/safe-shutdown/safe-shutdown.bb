@@ -8,15 +8,15 @@ SRC_URI = "file://safe-shutdown.service \
 
 do_install() {
     # Install the safe-shutdown script
-    install -d ${D}/opt/scripts
-    install -m 0755 ${WORKDIR}/safe-shutdown.sh ${D}/opt/scripts/
+    install -d ${D}/opt/uthp/scripts/
+    install -m 0755 ${WORKDIR}/safe-shutdown.sh ${D}/opt/uthp/scripts/
 
     # Install the systemd service file for the safe-shutdown script
     install -d ${D}${systemd_unitdir}/system
     install -m 0644 ${WORKDIR}/safe-shutdown.service ${D}${systemd_unitdir}/system/
 }
 
-FILES:${PN} += "/opt/scripts/safe-shutdown.sh \
+FILES:${PN} += "/opt/uthp/scripts/safe-shutdown.sh \
                 ${systemd_unitdir}/system/safe-shutdown.service"
 
 RDEPENDS:${PN} = "systemd bash"

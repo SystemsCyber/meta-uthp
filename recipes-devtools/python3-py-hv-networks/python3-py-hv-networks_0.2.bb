@@ -1,16 +1,17 @@
 DESCRIPTION = "The package provides SAE J1939 support for Python developers"
 SECTION = "devel/python"
 LICENSE = "CLOSED"
-# LIC_FILES_CHKSUM = "file://${THISDIR}/LICENSE;md5=9cbb8e86b6798efc990e6ac9a33a8b14"
 
-# Specify the source file location
-SRC_URI = "git://github.com/TruckHacking/py-hv-networks.git;protocol=https;rev=3af73282a7748ad4507edfd2071e7f130b596898;branch=master"
-SRC_URI[sha256sum] = "7c72341c6e872d9b9e10a681d77a407e8e2cf4e1b88a315e24bd82a938496ad2"
+SRC_URI = "git://github.com/TruckHacking/py-hv-networks.git;protocol=https;rev=559d9e1dda2d21bfd7dec611f1e47a84e2fb449d;branch=master"
 
 S = "${WORKDIR}/git"
-
-# Assuming the use of poetry or a similar tool as the build backend
 inherit setuptools3
 
-
-
+# TODO: test this
+do_install(){
+    # install scripts
+    install -d ${D}${bindir}
+    install -m 0755 ${S}/j1708dump.py ${D}${bindir}
+    install -m 0755 ${S}/j1708send.py ${D}${bindir}
+    install -m 0755 ${S}/test_j1587_driver.py ${D}${bindir}
+}

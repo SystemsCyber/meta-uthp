@@ -1,0 +1,3 @@
+#!/bin/bash
+chown -R uthp:uthp /home/uthp
+exit 0

@@ -1,0 +1,3 @@
+#!/bin/bash
+echo "Are you connected to the internet? (y/n)"
+sudo apt install sigrok-firmware-fx2lafw

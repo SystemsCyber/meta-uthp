@@ -11,7 +11,7 @@ IMAGE_LINGUAS = "en-us"
 
 IMAGE_INSTALL = " packagegroup-core-boot ${CORE_IMAGE_EXTRA_INSTALL}"
 
-# The rootfs size is 2.7GB which is adjust dynamically by bitbake
+# The rootfs size is 2.7GB which is adjusted dynamically by bitbake
 IMAGE_ROOTFS_SIZE = "2797152"
 
 CORE_OS = " \
@@ -33,7 +33,6 @@ KERNEL_EXTRA_INSTALL = " \
     kernel-devsrc \
     uthp-devicetrees \
  "
-# deleted vcan0
 
 DEV_SDK_INSTALL = " \
     binutils \
@@ -65,7 +64,6 @@ DEV_SDK_INSTALL = " \
     ti-cgt-pru \
     screen \
  "
-# need rsync to get the files from the host to the target for apt-keys at least
 
 EXTRA_TOOLS_INSTALL = " \
     bc \
@@ -103,8 +101,6 @@ EXTRA_TOOLS_INSTALL = " \
     curl \
  "
 
-# FIXME: missing man command
-
 CAN_TOOLS = " \
     can-utils \
     libsocketcan \
@@ -128,7 +124,6 @@ PYTHON_TOOLS = " \
     python-typing \
  "
 
-# FIXME: scapy six issues?
 PYTHON3_TOOLS = " \
     python3 \
     python3-core \
@@ -163,46 +158,6 @@ PYTHON3_TOOLS = " \
     python3-click \
     python3-rpds-py \
  "
-
-# TODO:
-
-## Tools we still need to add / test
-# python3-pretty-j1939 --> add json files dynamically from our local storage
-# python3-pretty-j1587 --> add json files dynamically from our local storage
-# plc4trucksduck --> Test the firmware on the Yocto distro
-# python3-py-hv-networks
-# cmap
-# cannelloni-server
-
-## Tools we need to port
-# CanCat --> needs to be ported to SocketCAN
-
-## Tools we need to expose over serial
-# Expose CanCat encoding for use by CanCat
-# Expose GRIMMs j1708 encoding for use by GRIMMs tools
-# Exopose Truck Devil 'serial stuff' for use by Truck Devil
-
-## Tools we need to expose over TCP/UDP
-# Expose the py-hv-networks j1708 udp server (already done pretty much)
-# Expose M2 CAN encoding over TCP socket and add Truck Devil 'serial stuff'
-# Expose CanCat encoding over TCP socket and add TCP support to CanCat
-# Expose GRIMMs j1708 encoding over TCP socket and add TCP supprot to GRIMMs tools
-
-## jupyter lab
-# python3-rpds-py \ --> needs to be v0.2.0???
-
-## core image
-# (check the fix-uthp script under base-files)
-## jupyter lab - NOTE Fixed                 
-# python3-rpds-py \ --> needs to be v0.2.0??? NOTE: Fixed
-## core image
-# fix uthp user home directory (not chowned by uthp) NOTE: Fixed
-# (check the fix-uthp script under base-files)
-# actually add license files to recipes to be compliant
-
-## interesting tools we should add
-# https://github.com/coder/code-server/
-
 
 IMAGE_INSTALL += " \
     ${CAN_TOOLS} \

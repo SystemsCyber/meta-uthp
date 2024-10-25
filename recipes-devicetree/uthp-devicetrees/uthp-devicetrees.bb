@@ -7,6 +7,7 @@ SRC_URI += "file://BB-UTHP-DCAN.dtbo \
             file://MCP251xFD-SPI.dts \
             file://BB-UART5-00A0.dtbo \
             file://BB-UART5-00A0.dts \
+            file://update-overlays \
             "
 
 LICENSE = "CLOSED"
@@ -16,6 +17,11 @@ do_install() {
     install -d ${D}/boot/dts/uthp
     install -m 0644 ${WORKDIR}/*.dtbo ${D}/boot/dtb/uthp
     install -m 0644 ${WORKDIR}/*.dts ${D}/boot/dts/uthp
+
+    install -d ${D}/usr/bin
+    install -m 0755 ${WORKDIR}/update-overlays ${D}/usr/bin
 }
 
-FILES:${PN} += "/boot/*"
+RDEPENDS:${PN} += "bash"
+
+FILES:${PN} += "/boot/* /usr/bin/*"

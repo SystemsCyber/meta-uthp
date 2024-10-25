@@ -1,5 +1,4 @@
 #!/bin/bash
-# 4. add dtbs to extlinux.conf
 # Define source and destination directories
 DTB_SOURCE_DIR="/boot/dtb/uthp/"
 EXTLINUX_DIR="/boot/p1/extlinux/"
@@ -19,12 +18,15 @@ fi
 # Copy some specific .dtbo files to source directory
 # (these are added by ti)
 cp /boot/dtb/BB-I2C1-MCP7940X-00A0.dtbo "$DTB_SOURCE_DIR"
-cp /boot/dtb/BB-UART4-00A0.dtbo "$DTB_SOURCE_DIR"
-cp /boot/dtb/BB-UART2-00A0.dtbo "$DTB_SOURCE_DIR"
 
 # Copy all *.dtbo files from source to destination directory
 # (these are added by us)
-cp "$DTB_SOURCE_DIR"*.dtbo "$EXTLINUX_DIR"
+# Check if there is space on the partition before copying
+if cp "$DTB_SOURCE_DIR"*.dtbo "$EXTLINUX_DIR"; then
+    echo "==> Copied all .dtbo files from $DTB_SOURCE_DIR to $EXTLINUX_DIR"
+else
+    echo "==> Not enough space on the partition to copy all .dtbo files. Please free up some space."
+fi
 
 # Backup the extlinux.conf file
 cp "$EXTLINUX_CONF" "${EXTLINUX_CONF}.backup.$(date +%Y%m%d%H%M%S)"
@@ -43,14 +45,5 @@ sed -i '/FDTOVERLAYS/d' "$EXTLINUX_CONF"
 # Insert the new FDTOVERLAYS line
 sed -i "/FDTDIR ../a \\\t${FDTOVERLAYS}" "$EXTLINUX_CONF"
 
-echo "The .dtbo files have been added to the extlinux.conf file as a single FDTOVERLAYS line as follows:"
-cat "$EXTLINUX_CONF" | grep FDTOVERLAYS
-
-echo "==> Added .dtbo files to extlinux.conf"
-
-### UPDATES ###
-# every 10 mins this script can be run from a service file
-# or
-# can be run from /usr/bin/update-overlays
-# can check with show-pins utility
-# maybe use softlinks ???
+echo "==> Added .dtbo files to $EXTLINUX_CONF:"
+cat "$EXTLINUX_CONF"

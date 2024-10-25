@@ -1,0 +1,4 @@
+#!/bin/bash
+stty -F /dev/ttyS5 19200
+echo "==> Updated the baud rate on UART5 to 19200"
+exit 0

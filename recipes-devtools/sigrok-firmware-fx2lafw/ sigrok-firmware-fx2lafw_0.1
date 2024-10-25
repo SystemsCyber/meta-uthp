@@ -1,0 +1,20 @@
+DESCRIPTION = "Sigrok firmware for FX2-based logic analyzer devices"
+HOMEPAGE = "https://sigrok.org"
+LICENSE = "CLOSED"
+
+# GitHub repository and branch/tag to fetch
+SRC_URI = "git://github.com/sigrokproject/sigrok-firmware-fx2lafw.git;protocol=https;rev=0f2d3242ffb5582e5b9a018ed9ae9812d517a56e;branch=master"
+
+
+S = "${WORKDIR}/git"
+
+DEPENDS = "libusb1"
+
+inherit allarch
+
+do_install() {
+    install -d ${D}${libdir}/firmware
+    install -m 0644 ${S}/fx2lafw.hex ${D}${libdir}/firmware/
+}
+
+FILES:${PN} += "${libdir}/firmware*"

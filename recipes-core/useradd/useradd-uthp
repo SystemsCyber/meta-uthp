@@ -1,0 +1,46 @@
+## FIXME: useradd needs to set the correct permissions for the user uthp
+SUMMARY = "Useradd for UTHP"
+DESCRIPTION = "Sets up users and groups for the UTHP"
+SECTION = "core"
+LICENSE = "CLOSED"
+S = "${WORKDIR}"
+
+EXCLUDE_FROM_WORLD = "1"
+
+# Specify the home directory path
+HOMEPATH = "/home/uthp"
+
+inherit useradd
+
+USERADD_PACKAGES = "${PN}"
+
+PASS = '\$6\$kXDp5Q1Ki1mAOJ7U\$Bz7DjUHuRjnO/oPL6Xc3/TOiknek/eXiXIL8wiU00VpNJmd9dMayr6RvsY5Ip9DZ7Q9CAZEhFIKAgYRJf8ZgV0'
+
+USERADD_PARAM:${PN} = "-u 1000 -d ${HOMEPATH} -s /bin/bash -p ${PASS} -g uthp uthp"
+GROUPADD_PARAM:${PN} = "-g 1000 uthp"
+
+do_install() {
+    install -d -m 0755 ${D}${HOMEPATH}
+    chown uthp:uthp ${D}${HOMEPATH}
+}
+
+# Ensure that this recipe runs after the root filesystem is created
+# FILES:${PN} = ${HOMEPATH}
+
+# Set ownership after the image is installed if required (optional)
+pkg_postinst:${PN}() {
+    if [ -n "$D" ]; then
+        # Running during the build
+        chown -R uthp:uthp $D${HOMEPATH}
+    else
+        # Running on the target
+        chown -R uthp:uthp ${HOMEPATH}
+    fi
+}
+
+# FILES:${PN} = ${HOMEPATH}
+
+INHIBIT_PACKAGE_DEBUG_SPLIT = "1"
+
+# Ensure bash is available
+RDEPENDS:${PN} = "bash"

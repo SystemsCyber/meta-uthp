@@ -10,10 +10,10 @@ SRC_URI += "file://init-uthp.sh \
             file://emmc-flasher \
             file://timesyncd.conf \
             file://fix-uthp \
-            file://J1939db.json \
-            file://J1708_201609.pdf.txt \
-            file://J1587_201301.pdf.txt \
             file://rpds-py.sh \
+            file://default-user-perm.sh \
+            file://synclock.sh \
+            file://syn_hw_sys_clock.sh \
             "
 
 do_install:append() {
@@ -41,6 +41,16 @@ do_install:append() {
     ln -sf ${sysconfdir}/init.d/default-user-perm.sh ${D}${sysconfdir}/rc3.d/S99default-user-perm
     ###
 
+    #### Set time (Sys,HW) and time zone
+    install -m 0755 ${WORKDIR}/syn_hw_sys_clock.sh ${D}/usr/bin/syn_clocks
+
+
+    #### Sync Clock time Zone at boot (The source of truth about time is the HW)
+    install -m 0755 ${WORKDIR}/synclock.sh ${D}${sysconfdir}/init.d/synclock.sh
+    # Create a symlink to ensure the script runs at startup
+    ln -sf ${sysconfdir}/init.d/synclock.sh ${D}${sysconfdir}/rc3.d/S99synclock.sh
+    ###
+
 
     install -d ${D}/home/uthp
     install -d ${D}/root
@@ -49,12 +59,12 @@ do_install:append() {
     install -m 0644 ${WORKDIR}/.nanorc ${D}/home/uthp/.nanorc
 
     # standards
-    install -d ${D}/opt/uthp/J1939
-    install -m 0644 ${WORKDIR}/J1939db.json ${D}/opt/uthp/J1939/J1939db.json
-    install -d ${D}/opt/uthp/J1708
-    install -m 0644 ${WORKDIR}/J1708_201609.pdf.txt ${D}/opt/uthp/J1708/J1708_201609.pdf.txt
-    install -d ${D}/opt/uthp/J1587
-    install -m 0644 ${WORKDIR}/J1587_201301.pdf.txt ${D}/opt/uthp/J1587/J1587_201301.pdf.txt
+    # install -d ${D}/opt/uthp/J1939
+    # install -m 0644 ${WORKDIR}/J1939db.json ${D}/opt/uthp/J1939/J1939db.json
+    # install -d ${D}/opt/uthp/J1708
+    # install -m 0644 ${WORKDIR}/J1708_201609.pdf.txt ${D}/opt/uthp/J1708/J1708_201609.pdf.txt
+    # install -d ${D}/opt/uthp/J1587
+    # install -m 0644 ${WORKDIR}/J1587_201301.pdf.txt ${D}/opt/uthp/J1587/J1587_201301.pdf.txt
 
     # given that bash is the default shell, we need to install these files for root as well
     install -m 0644 ${WORKDIR}/.bashrc-root ${D}/root/.bashrc

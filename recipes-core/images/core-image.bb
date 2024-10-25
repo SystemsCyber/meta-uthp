@@ -61,8 +61,6 @@ DEV_SDK_INSTALL = " \
     libxml2-dev \
     libnl \
     libnl-dev \
-    pru-icss \
-    ti-cgt-pru \
     screen \
  "
 # need rsync to get the files from the host to the target for apt-keys at least

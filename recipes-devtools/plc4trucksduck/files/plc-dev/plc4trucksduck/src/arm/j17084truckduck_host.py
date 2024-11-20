@@ -21,12 +21,8 @@ def signal_handler(sig, frame):
     print("Signal received, exiting...")
     exit_event.set()
 
-def load_pru_firmware():
-    """Load and start the PRU firmware using remoteproc."""
+def stop_pru():
     state_path = os.path.join(REMOTE_PROC_PATH, "state")
-    firmware_path = os.path.join(REMOTE_PROC_PATH, "firmware")
-
-    # Stop the PRU if it's already running
     try:
         with open(state_path, 'r') as f:
             state = f.readline().strip()
@@ -38,15 +34,8 @@ def load_pru_firmware():
         print(f"Error stopping PRU: {e}")
         sys.exit(1)
 
-    # Set the PRU firmware
-    try:
-        with open(firmware_path, 'w') as f:
-            f.write(os.path.basename(PRU_FW_PATH) + '\n')
-    except IOError as e:
-        print(f"Error setting PRU firmware: {e}")
-        sys.exit(1)
-
-    # Start the PRU
+def start_pru():
+    state_path = os.path.join(REMOTE_PROC_PATH, "state")
     try:
         with open(state_path, 'w') as f:
             f.write("start\n")
@@ -54,20 +43,23 @@ def load_pru_firmware():
         print(f"Error starting PRU: {e}")
         sys.exit(1)
 
-    print("PRU firmware loaded and started")
+def set_firmware():
+    firmware_path = os.path.join(REMOTE_PROC_PATH, "firmware")
+    try:
+        with open(firmware_path, 'w') as f:
+            f.write(os.path.basename(PRU_FW_PATH) + '\n')
+    except IOError as e:
+        print(f"Error setting PRU firmware: {e}")
+        sys.exit(1)
 
 def read_from_pru(rpmsg, sock):
     rpmsg_fd = rpmsg.fileno()
-    first = True
     while not exit_event.is_set():
         rlist, _, _ = select.select([rpmsg_fd], [], [], 1)
         if rlist:
             try:
                 data = os.read(rpmsg_fd, PAYLOAD_LEN)
                 if data:
-                    if first:
-                        first = False
-                        continue
                     sock.sendto(data, ('0.0.0.0', UDP_PORTS[1]))
                     print("Received from PRU:", data.hex())
                     print(time.time())
@@ -100,11 +92,17 @@ if __name__ == "__main__":
         # Bind the socket to receive UDP data
         sock.bind(('0.0.0.0', UDP_PORTS[0]))
         sock.setblocking(False)
-
-        # Load and start the PRU firmware
-        load_pru_firmware()
     except OSError as e:
-        print(f"Socket or PRU error: {e}")
+        print(f"Socket error: {e}")
+        sys.exit(-1)
+
+    # Load and start the PRU firmware
+    try:
+        stop_pru() # always stop before loading new firmware
+        set_firmware()
+        start_pru()
+    except OSError as e:
+        print(f"PRU error: {e}")
         sys.exit(-1)
 
     time.sleep(1)  # Give time for RPMsg device creation
@@ -119,6 +117,17 @@ if __name__ == "__main__":
 
     # Clear any initial garbage data
     os.write(rpmsg.fileno(), b'\x00')
+    # Flush RPMsg buffer
+    start = time.time()
+    # around 4 seconds seems to work well
+    while time.time() - start < 4:
+        try:
+            data = os.read(rpmsg.fileno(), PAYLOAD_LEN)
+            if not data:
+                break
+        except OSError:
+            break
+    print("RPMsg buffer flushed.")
 
     # Create and start threads for reading from and writing to PRU
     read_thread = threading.Thread(target=read_from_pru, args=(rpmsg, sock))
@@ -134,3 +143,4 @@ if __name__ == "__main__":
     # Clean up after threads finish
     rpmsg.close()
     sock.close()
+    stop_pru()

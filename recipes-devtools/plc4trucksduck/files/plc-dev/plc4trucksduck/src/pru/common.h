@@ -30,7 +30,9 @@ int __inline isBusIdle(uint8_t numChecks) {
     /* Number of passes needed to achieve ~5.2 ms idle time
      Each pass of isBusIdle(20) checks for ~1.04 ms
     Thus, we need 5 passes: 5 * 1.04 ms ≈ 5.2 ms */
+    #ifdef J1708
     numChecks = numChecks * 5;
+    #endif
     for(int i = 0; i < numChecks; i++) {
         #ifdef J1708
         if(UART_LSR & 0x1) { // Data Ready bit is set
@@ -75,15 +77,17 @@ void pruInit(struct pru_rpmsg_transport* transport) {
 }
 
 int16_t receiveRemainingMessage(uint8_t* buf) {
-    int16_t i = -1; // TODO: this hack needs to be fixed in future versions
-    for (; i < MAX_PAYLOAD_LEN; i++) { // Read until we get a bus idle
-        uartGetC(&buf[i]);
-        if (isBusIdle(CHECKS_TILL_MSG_FINISHED)) { // if bus idle function returns 1 then break
-            i++;
-            break;
+    uint16_t i = 0;
+    while (i < MAX_PAYLOAD_LEN) {
+        if (uartGetC(&buf[i])) {
+            i++; 
+        }
+        if (isBusIdle(CHECKS_TILL_MSG_FINISHED)) {
+            break; // Exit the loop if the bus is idle
         }
     }
-    return i;
+    return i; // Return the number of bytes received
 }
+
 
 #endif /* COMMON_H */

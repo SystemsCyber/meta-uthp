@@ -56,6 +56,9 @@ source oe-init-build-env
 ```
 
 Then you can build the image:
+> Note: you need to have all the standards under the same location so our recipe can pull them. Otherwise delete or modify the [base files recipe](./recipes-core/base-files/base-files_%.bbappend)
+
+
 ```shell
 bitbake core-image
 ```

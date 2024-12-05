@@ -82,7 +82,12 @@ function clone_and_checkout() {
 
 echo -e "\n==>Installing necessary packages...\n"
 # 1. setup build host
-sudo apt install -y gawk wget git diffstat unzip texinfo gcc build-essential chrpath socat cpio python3 python3-pip python3-pexpect xz-utils debianutils iputils-ping python3-git python3-jinja2 libegl1-mesa libsdl1.2-dev pylint xterm python3-subunit mesa-common-dev zstd liblz4-tool || handle_error $LINENO
+sudo apt update
+sudo apt install -y gawk wget git diffstat unzip texinfo gcc build-essential chrpath socat cpio python3 python3-pip python3-pexpect xz-utils debianutils iputils-ping python3-git python3-jinja2 libsdl1.2-dev pylint xterm python3-subunit mesa-common-dev zstd liblz4-tool || handle_error $LINENO
+sudo apt install -y libegl1-mesa || echo "Warning: Optional package 'libegl1-mesa' may need to be installed manually." # ubuntu 24 issue
+sudo dpkg --add-architecture i386 # for ti-cgt-pru
+sudo apt update
+sudo apt install libc6:i386
 echo -e "\n==> Package installation completed.\n"
 
 # 2. Clone the Yocto layers

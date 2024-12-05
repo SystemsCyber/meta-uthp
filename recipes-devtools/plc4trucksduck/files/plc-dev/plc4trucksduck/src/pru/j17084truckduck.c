@@ -109,14 +109,8 @@ void main() {
                 }
             }
         } else if (uartGetC(receiveBuf)) { // Is there anything to receive?
-            // uint8_t debugMsg[1] = {0x22};
-            // pru_rpmsg_send(&transport, dst, src, debugMsg, 1);
             uint16_t recvLen = receiveRemainingMessage(&receiveBuf[1]);
-            recvLen += 1; // add the last byte
-            //uint8_t debugMsg[2] = {recvLen & 0xFF, (recvLen >> 8) & 0xFF}; // store recvLen as two bytes
-            //pru_rpmsg_send(&transport, dst, src, debugMsg, 2);
             pru_rpmsg_send(&transport, dst, src, receiveBuf, recvLen);
-            // clear receiveBuf so we know its been sent
             memset(receiveBuf, 0, MAX_PAYLOAD_LEN);
         }
     }

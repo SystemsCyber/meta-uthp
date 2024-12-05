@@ -20,7 +20,7 @@
 */
 
 #define PRU_NO 0
-#define BBB_GPIO_PIN 60 // IDLE LINE DETECT: TODO: Test this
+#define BBB_GPIO_PIN 88 // IDLE LINE DETECT: TODO: Test this
 #define UART_NUM 4
 
 /* Host-0 Interrupt sets bit 30 in register R31 */
@@ -109,7 +109,6 @@ void main() {
             }
         } else if (uartGetC(receiveBuf)) { // Is there anything to receive?
             uint16_t recvLen = receiveRemainingMessage(&receiveBuf[1]);
-            recvLen += 1; // add the last byte
             pru_rpmsg_send(&transport, dst, src, receiveBuf, recvLen);
             memset(receiveBuf, 0, MAX_PAYLOAD_LEN);
         }

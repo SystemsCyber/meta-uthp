@@ -110,7 +110,7 @@ void main() {
             }
         } else if (uartGetC(receiveBuf)) { // Is there anything to receive?
             uint16_t recvLen = receiveRemainingMessage(&receiveBuf[1]);
-            pru_rpmsg_send(&transport, dst, src, receiveBuf, recvLen);
+            pru_rpmsg_send(&transport, dst, src, receiveBuf, recvLen+1);
             memset(receiveBuf, 0, MAX_PAYLOAD_LEN);
         }
     }

@@ -72,9 +72,6 @@ void main() {
 	uint16_t src = 0;
     uint16_t dst = 0;
     uint16_t len = 0;
-	
-    // Testing
-    uint16_t dbgMsg[1] = {0x00};
 
     pruInit(&transport);
     // Need to initialize src and dst
@@ -84,23 +81,16 @@ void main() {
     while (1) {
         // Is there a message to transmit?
         if (transmitBuf[0] != 0 || pru_rpmsg_receive(&transport, &src, &dst, transmitBuf, &len) == PRU_RPMSG_SUCCESS) {
-            pru_rpmsg_send(&transport, dst, src, dbgMsg, sizeof(dbgMsg));
             if (isBusIdle(CHECKS_TILL_BUS_IDLE)) {
                 // Send MID. Using uartWrite over uartPutC so that it waits to
                 // return until byte is transmitted.
-                dbgMsg[0] = 0x01;
-                pru_rpmsg_send(&transport, dst, src, dbgMsg, sizeof(dbgMsg));
                 uartWrite(transmitBuf, 1);
                 // Arbitration: Send MID, check if what we recv is the same
                 // (no one else is talking) or greater than what we sent
                 // (arbitration win since we have a lower value). If so we
                 // continue talking, otherwise we backoff.
-                __delay_cycles(2000000); // wait period for echo back
-                dbgMsg[0] = receiveBuf[0];
-                pru_rpmsg_send(&transport, dst, src, dbgMsg, sizeof(dbgMsg));
+                __delay_cycles(600000); // wait period for echo back
                 if (uartGetC(&receiveBuf[0])) {
-                    dbgMsg[0] = 0x02;
-                    pru_rpmsg_send(&transport, dst, src, dbgMsg, sizeof(dbgMsg));
                     if (transmitBuf[0] <= receiveBuf[0]) {
                         // Either no one else is talking or we won arbitration
                         // uartWrite will only return once all bytes have been sent.
@@ -114,8 +104,6 @@ void main() {
                         pru_rpmsg_send(&transport, dst, src, receiveBuf, recvLen+1);
                     }
                 } else {
-                    dbgMsg[0] = 0x03;
-                    pru_rpmsg_send(&transport, dst, src, dbgMsg, sizeof(dbgMsg));
                     // Error - the P485 chip should echo first char back
                     __halt();
                 }

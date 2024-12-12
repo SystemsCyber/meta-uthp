@@ -68,5 +68,23 @@ tmux new-session -d -s core-image 'bitbake core-image'
 ```
 After the image is complete, you can flash it to your device from 'deploy-ti/images/uthp/core-image-uthp.rootfs.wic.xz' with your favorite flashing tool (tested with balenaEtcher).
 
-Any issues can be reported to the layer maintainer as of 8/16/2024: beersc@colostate.edu
+To connect to the device, you can use Windows 10/11, or Linux with the following command:
+```shell
+ssh uthp@192.168.7.2
+```
+or 
+```shell
+screen /dev/ttyACM0 115200
+```
+or 
+```shell
+minicom -D /dev/ttyACM0
+```
+or
+```
+putty.exe -serial COM8 -sercfg 115200,8,1,n,n
+```
+> Note there are 4 serial device interfaces served by the device. You can only use one of them for logging in. The other 3 are for diagnostics.
+
+Any issues can be reported to the layer maintainer as of 12/12/2024: beersc@colostate.edu
 ---

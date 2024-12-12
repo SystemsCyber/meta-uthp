@@ -78,16 +78,6 @@ $(PRU_GEN_DIR):
 clean:
 	rm -rf $(PRU_GEN_DIR) $(ARM_BUILD_DIR)
 
-# Python code check
-check:
-	~/.local/bin/flake8 src/arm/*.py
-
-# Installation
-#install -m 755 $(ARM_SRC_DIR)/j1708send.py /usr/local/bin/ # TODO: Eventually
-#install -m 755 $(ARM_SRC_DIR)/j1708dump.py /usr/local/bin/ # TODO: Eventually
-#install -m 644 $(ARM_SRC_DIR)/j17084truckduck.service /etc/systemd/system/ # TODO: Eventually
-#install -m 644 $(ARM_SRC_DIR)/plc4trucksduck.service /etc/systemd/system/ # TODO: Eventually
-
 SHELL := /bin/bash
 
 install: $(DTB_OFILES)
@@ -95,16 +85,17 @@ install: $(DTB_OFILES)
 	./stop_remoteproc
 	install -d /etc/systemd/system
 	install -m 600 $(THIS_DTB_OFILE) /boot/p1/extlinux/
-	install -m 700 $(ARM_SRC_DIR)/j17084truckduck_host.py /usr/bin/
+	install -m 700 $(ARM_SRC_DIR)/j17084truckduck_host /usr/bin/
 	install -m 600 $(PRU_GEN_DIR)/j17084truckduck.out /lib/firmware/am335x-pru1-fw
-	install -m 700 $(ARM_SRC_DIR)/plc4trucksduck_host.py /usr/bin/
+	install -m 700 $(ARM_SRC_DIR)/plc4trucksduck_host /usr/bin/
 	install -m 600 $(PRU_GEN_DIR)/plc4trucksduck.out /lib/firmware/am335x-pru0-fw
-	install -m 644 $(ARM_SRC_DIR)/pru4trucksduck.service /etc/systemd/system/
+	install -m 644 $(ARM_SRC_DIR)/plc4ultimatetrucksduck.service /etc/systemd/system/
+	install -m 644 $(ARM_SRC_DIR)/j17084ultimatetruckduck.service /etc/systemd/system/
 	chmod +x /usr/bin/plc4trucksduck_host.py
 	chmod +x /usr/bin/j17084truckduck_host.py
 	@echo NOTE /// You must reboot before you can load $(THIS_DTB_OFILE) ///
 
-.PHONY: all clean check install
+.PHONY: all clean install plc j1708
 
 plc:
 	sudo /usr/bin/plc4trucksduck_host.py

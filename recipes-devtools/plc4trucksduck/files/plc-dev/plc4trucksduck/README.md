@@ -1,5 +1,50 @@
 # PLC4TRUCKSduck
 
+## Ultimate Truck Hacking Platform (UTHP):
+
+The PLC4TrucksDuck firmware for the BeagleBone Black has been modified for the UTHP and has been tested on the UTHP. The UTHP is a BeagleBone Black with a custom cape that provides a J1708 interface and a PLC interface, similar to it's daughter boards. To start download an image from the https://github.com/SystemsCyber/UTHP website. 
+
+### Development:
+
+To make the binaries for the pru, run:
+```
+sudo make
+```
+To install the binaries and device tree overlays, run:
+```
+sudo make install
+```
+To run the PLC4TrucksDuck firmware, run:
+```
+sudo plc
+```
+To run the J1708 firmware, run:
+```
+sudo j1708
+```
+The user space code can be run as a service:
+```
+sudo systemctl start plc4trucksduck
+```
+or
+```
+sudo systemctl start j17084truckduck
+```
+These services should be run seperately. To stop the services, run:
+```
+sudo systemctl stop plc4trucksduck
+```
+or
+```
+sudo systemctl stop j17084truckduck
+```
+or kill the pru processes:
+```
+sudo ./stop_remoteproc
+```
+
+## Legacy Truck Duck:
+
 A PLC writing tool for the Truck Duck beaglebone based heavy vehicle diagnostic and debugging tool.
 
 For information on the Truck Duck, see https://github.com/TruckHacking. A great big thank you to @haystack-ia and @sixvolts for creating this wonderful open tool.

@@ -46,6 +46,7 @@ Download the uthp-setup-dev-env.sh script:
 wget https://github.com/SystemsCyber/meta-uthp/raw/scarthgap/uthp-setup-dev-env.sh
 ```
 Run it:
+> Note: Performed as root user within Linux env.
 ```shell
 chmod +x uthp-setup-dev-env.sh
 ./uthp-setup-dev-env.sh

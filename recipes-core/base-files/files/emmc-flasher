@@ -154,6 +154,33 @@ cleanup () {
     rm -rf /mnt/${source}p2
 }
 
+rename_host () {
+	read -p "Enter the serial number for this board: UTHP-R1-" SERIAL_NUMBER
+
+	if [[ -z "$SERIAL_NUMBER" ]]; then
+		echo "Serial number cannot be empty."
+		exit 1
+	fi
+
+	# Update /etc/hostname
+	echo "Updating /etc/hostname..."
+	echo "UTHP-R1-$SERIAL_NUMBER" > /etc/hostname
+	echo "Updated /etc/hostname."
+
+	# Update /etc/hosts
+	echo "Updating /etc/hosts..."
+	if grep -q "127.0.1.1" /etc/hosts; then
+		sed -i "s/^127.0.1.1 .*/127.0.1.1 UTHP-R1-$SERIAL_NUMBER/" /etc/hosts
+	else
+		echo "127.0.1.1 UTHP-R1-$SERIAL_NUMBER" >> /etc/hosts
+	fi
+
+	# Ensure localhost entry exists
+	if ! grep -q "127.0.0.1" /etc/hosts; then
+		echo "127.0.0.1 localhost" >> /etc/hosts
+	fi
+}
+
 # main
 echo "==> eMMC Flasher"
 # Check if user has sudo privileges
@@ -164,7 +191,9 @@ echo "==> eMMC Flasher"
     fi
 # 1. start leds
 cylon_leds & CYLON_PID=$!
-# 2. erase emmc
+# 2. rename host
+rename_host
+# 3. erase emmc
 echo "==> Erasing eMMC"
 flush_cache
 dd if=/dev/zero of=/dev/${destination} bs=1M count=108
@@ -172,25 +201,25 @@ sync
 dd if=/dev/${destination} of=/dev/null bs=1M count=108
 sync
 flush_cache
-# 3. partition emmc
+# 4. partition emmc
 echo "==> Partitioning eMMC"
 partition_drive
-# 4. format partitions
+# 5. format partitions
 echo "==> Formatting eMMC"
 format_partitions
-# 5. copy partitions
+# 6. copy partitions
 echo "==> Copying eMMC"
 copy_partitions
-# 6. regenerate ssh keys
+# 7. regenerate ssh keys
 echo "==> Regenerating SSH keys"
 regenerate_ssh_keys
-# 7. regenerate fstab
+# 8. regenerate fstab
 echo "==> Regenerating fstab"
 sed -i "s/${source}/${destination}/g" /mnt/${destination}p2/etc/fstab
-# 8. cleanup
+# 9. cleanup
 echo "==> Cleaning up"
 cleanup
-# 9. stop leds
+# 10. stop leds
 kill $CYLON_PID > /dev/null 2>&1
 echo "==> eMMC Flashing Complete"
 echo "==> Please power off your device, remove the SD card, and power it back on"

@@ -41,4 +41,6 @@ initializeANSI()
 
 initializeANSI
 
+## only difference here is the `#` at the end of the prompt to indicate the user is root
+
 export PS1="\[$greenf\]\h\[$reset\]:\[$greenfbright\]\w\[$reset\]# "

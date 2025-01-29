@@ -1,5 +1,4 @@
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
-FILESEXTRAPATHS:prepend := "/storage/standards:"
 SRC_URI += "file://init-uthp.sh \
             file://fstab \
             file://.bashrc \
@@ -16,6 +15,12 @@ SRC_URI += "file://init-uthp.sh \
             file://check-uthp \
             file://check-baud \
             file://sigrok-firmware-installer \
+            "
+
+# These need to be added to the files directory manually. Use popper-utils pdftotext to convert the pdfs to text files.
+SRC_URI += "file://J1939db.json \
+            file://J1708_201609.pdf.txt \
+            file://J1587_201301.pdf.txt \
             "
 
 do_install:append() {
@@ -70,7 +75,7 @@ do_install:append() {
     install -d ${D}/usr/bin
     install -m 0755 ${WORKDIR}/emmc-flasher ${D}/usr/bin/emmc-flasher
 
-    # need to test rtc with timesyncd
+    # TODO: need to test rtc with timesyncd
     install -d ${D}${sysconfdir}/systemd/timesyncd.conf.d
     install -m 0644 ${WORKDIR}/timesyncd.conf ${D}${sysconfdir}/systemd/timesyncd.conf.d/timesyncd-uthp.conf
 }

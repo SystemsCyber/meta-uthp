@@ -18,5 +18,6 @@ BBLAYERS ?= " \
   ${FULL_YOCTO_DIR}/meta-arm/meta-arm \
   ${FULL_YOCTO_DIR}/meta-ti/meta-ti-bsp \
   ${FULL_YOCTO_DIR}/meta-ti/meta-ti-extras \
+  ${FULL_YOCTO_DIR}/meta-ti/meta-beagle \
   ${FULL_YOCTO_DIR}/meta-uthp \
   "

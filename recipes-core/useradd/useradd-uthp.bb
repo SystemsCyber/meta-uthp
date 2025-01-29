@@ -1,4 +1,4 @@
-## FIXME: useradd needs to set the correct permissions for the user uthp
+## TODO: useradd needs to set the correct permissions for the user uthp
 SUMMARY = "Useradd for UTHP"
 DESCRIPTION = "Sets up users and groups for the UTHP"
 SECTION = "core"

@@ -1,5 +1,5 @@
 #!/bin/bash
-
+# TODO: optimize this script
 # List of common US time zones
 timezones=(
   "America/New_York"    # Eastern Time

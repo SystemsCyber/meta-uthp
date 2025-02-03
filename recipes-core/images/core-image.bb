@@ -60,7 +60,6 @@ DEV_SDK_INSTALL = " \
     libxml2-dev \
     libnl \
     libnl-dev \
-    pru-icss \
     ti-cgt-pru \
     screen \
  "

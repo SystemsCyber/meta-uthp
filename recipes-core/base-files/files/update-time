@@ -1,6 +1,4 @@
 #!/bin/bash
-# TODO: optimize this script
-# List of common US time zones
 timezones=(
   "America/New_York"    # Eastern Time
   "America/Chicago"     # Central Time
@@ -12,13 +10,11 @@ timezones=(
   "Pacific/Honolulu"    # Hawaii Time
 )
 
-# Function to check internet connection
 check_internet() {
     wget -q --spider http://google.com
     return $?
 }
 
-# Function to prompt the user for timezone selection
 select_timezone() {
     echo "Select a time zone for the system:"
     for i in "${!timezones[@]}"; do
@@ -36,16 +32,14 @@ select_timezone() {
     fi
 }
 
-# Main script logic
 echo "Checking internet connection..."
 
+# TODO: test with internet connection
 if check_internet; then
     echo "Internet connection detected. Syncing date and time..."
 
-    # Prompt the user to select a timezone
     select_timezone
 
-    # Sync system time from internet
     timedatectl set-ntp true
     timedatectl status | grep "NTP synchronized: yes" > /dev/null
 
@@ -55,25 +49,19 @@ if check_internet; then
         echo "Failed to sync time from the internet."
     fi
 
-    # Sync the hardware clock with system time
     sudo hwclock --systohc
     echo "Hardware clock updated to match system time."
 else
     echo "No internet connection detected. Manual time entry required."
 
-    # Prompt the user to enter the date and time manually
     read -p "Enter the date and time (YYYY-MM-DD HH:MM:SS): " user_entered_time
 
-    # Set the system time manually
     sudo date -s "$user_entered_time"
 
-    # Prompt the user to select a timezone
     select_timezone
 
-    # Sync the hardware clock with the manually set system time
     sudo hwclock --systohc
     echo "System time and hardware clock set manually."
 fi
 
-# Exit successfully
 exit 0

@@ -29,6 +29,9 @@ The meta-uthp layer depends on the following layers:
 - **URI**: meta-arm  
   **branch**: scarthgap
 
+- **URI**: meta-ti-bsp  
+  **branch**: scarthgap
+
 - **URI**: meta-ti-extras  
   **branch**: scarthgap
 

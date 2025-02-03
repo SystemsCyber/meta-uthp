@@ -1,0 +1,36 @@
+From 24c5c885ca57b9c6485508620944b92f3e30c994 Mon Sep 17 00:00:00 2001
+From: spenc3rb <beersc@colostate.edu>
+Date: Wed, 29 Jan 2025 12:52:20 -0700
+Subject: [PATCH] intc-plc
+
+---
+ arch/arm/boot/dts/ti/omap/am33xx-l4.dtsi | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/arch/arm/boot/dts/ti/omap/am33xx-l4.dtsi b/arch/arm/boot/dts/ti/omap/am33xx-l4.dtsi
+index 1a9a206d4c63..10317fd0e066 100644
+--- a/arch/arm/boot/dts/ti/omap/am33xx-l4.dtsi
++++ b/arch/arm/boot/dts/ti/omap/am33xx-l4.dtsi
+@@ -915,6 +915,9 @@ pru0: pru@34000 {
+ 					      <0x22400 0x100>;
+ 					reg-names = "iram", "control", "debug";
+ 					firmware-name = "am335x-pru0-fw";
++					interrupt-parent = <&pruss_intc>;
++					interrupts = <16 2 2>;
++					interrupt-names = "vring";
+ 				};
+ 
+ 				pru1: pru@38000 {
+@@ -924,6 +927,9 @@ pru1: pru@38000 {
+ 					      <0x24400 0x100>;
+ 					reg-names = "iram", "control", "debug";
+ 					firmware-name = "am335x-pru1-fw";
++					interrupt-parent = <&pruss_intc>;
++					interrupts = <18 3 3>;
++					interrupt-names = "vring";
+ 				};
+ 
+ 				pruss_mdio: mdio@32400 {
+-- 
+2.34.1
+

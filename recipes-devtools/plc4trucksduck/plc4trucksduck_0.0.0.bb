@@ -1,4 +1,4 @@
-DESCRIPTION = "PLC4TRUCKSDUCK installation for BeagleBone Black"
+DESCRIPTION = "PLC4TRUCKSDUCK installation for the UTHP"
 LICENSE = "CLOSED"
 
 SRC_URI += " file://plc-dev"
@@ -11,24 +11,29 @@ do_install(){
     install -d ${D}${TARGET_DIR}
     cp -r ${WORKDIR}/plc-dev/* ${D}${TARGET_DIR}
 
-    # install programs
+    # install program directories
     install -d ${D}/usr/bin
-    install -d ${D}/lib/firmware
+    install -d ${D}/usr/lib/firmware
+    install -d ${D}/usr/lib/systemd/system
 
-    # firmware
-    install -m 0755 ${S}/plc-dev/plc4trucksduck/src/pru/generated/plc4trucksduck.out ${D}/lib/firmware/am335x-pru0-fw
-    install -m 0755 ${S}/plc-dev/plc4trucksduck/src/pru/generated/j17084truckduck.out ${D}/lib/firmware/am335x-pru1-fw
+    # firmware (needs to be copied becuase of objcopy errors in Yocto)
+    cp ${WORKDIR}/plc-dev/plc4trucksduck/src/pru/generated/plc4trucksduck.out ${D}/usr/lib/firmware/am335x-pru0-fw
+    cp ${WORKDIR}/plc-dev/plc4trucksduck/src/pru/generated/j17084truckduck.out ${D}/usr/lib/firmware/am335x-pru1-fw
 
     # user space code
-    install -m 0755 ${S}/plc-dev/plc4trucksduck/src/arm/build/plc4trucksduck_host ${D}/usr/bin
-    install -m 0755 ${S}/plc-dev/plc4trucksduck/src/arm/build/j17084truckduck_host ${D}/usr/bin
+    install -m 0755 ${WORKDIR}/plc-dev/plc4trucksduck/src/arm/plc4trucksduck_host ${D}/usr/bin
+    install -m 0755 ${WORKDIR}/plc-dev/plc4trucksduck/src/arm/j17084truckduck_host ${D}/usr/bin
 
     # services
-    install -m 0755 ${S}/plc-dev/plc4trucksduck/src/arm/build/plc4ultimatetrucksduck.service ${D}/lib/systemd/system
-    install -m 0755 ${S}/plc-dev/plc4trucksduck/src/arm/build/j17084ultimatetruckduck.service ${D}/lib/systemd/system
+    install -m 0755 ${WORKDIR}/plc-dev/plc4trucksduck/src/arm/j17084truckduck.service ${D}/usr/lib/systemd/system/j17084truckduck.service
+    install -m 0755 ${WORKDIR}/plc-dev/plc4trucksduck/src/arm/plc4trucksduck.service ${D}/usr/lib/systemd/system/plc4trucksduck.service
 }
 
-FILES:${PN} += "${TARGET_DIR}"
+FILES:${PN} += "${TARGET_DIR} \
+                /usr/lib/*"
+
+# only one can be enabled at a time with PRU resources available
+SYSTEMD_AUTO_ENABLE += "j17084truckduck.service"
 
 RDEPENDS:${PN} += "python3-core python3 python bash"
 INSANE_SKIP:${PN} += "arch"

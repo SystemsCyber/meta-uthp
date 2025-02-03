@@ -17,7 +17,7 @@ fi
 
 # Copy some specific .dtbo files to source directory
 # (these are added by ti)
-cp /boot/dtb/BB-I2C1-MCP7940X-00A0.dtbo "$DTB_SOURCE_DIR"
+cp /boot/dtb/ti/omap/BB-I2C1-MCP7940X-00A0.dtbo "$DTB_SOURCE_DIR"
 
 # Copy all *.dtbo files from source to destination directory
 # (these are added by us)
@@ -47,3 +47,5 @@ sed -i "/FDTDIR ../a \\\t${FDTOVERLAYS}" "$EXTLINUX_CONF"
 
 echo "==> Added .dtbo files to $EXTLINUX_CONF:"
 cat "$EXTLINUX_CONF"
+
+echo -e "\n==> Please reboot to apply the changes..."

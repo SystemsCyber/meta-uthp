@@ -14,19 +14,20 @@ TARGET_DIR = "/opt/uthp/programs/cmap"
 do_install() {
     install -d ${D}${TARGET_DIR}
     install -d ${D}/usr/bin
+
     cp -r ${S}/* ${D}${TARGET_DIR}
 
-    # Create a symlink to the sample program
+    chmod -R 755 ${D}${TARGET_DIR}
+    chown -R 1000:1000 ${D}${TARGET_DIR}
+
     ln -s ${TARGET_DIR}/scan_with_class.py ${D}/usr/bin/cmap
-    chmod +x ${D}/${TARGET_DIR}/scan_with_class.py
+    chmod +x ${D}${TARGET_DIR}/scan_with_class.py
 }
 
-# Quickly edit the shebang line
 do_compile() {
     sed -i '1i #!/usr/bin/python3' ${S}/scan_with_class.py
 }
 
 FILES:${PN} += "${TARGET_DIR}"
 
-# need to add these dependencies
-RDEPENDS:${PN} += "python3-can-isotp python3-inputtimeout python3-core"
+RDEPENDS:${PN} += "python3-can-isotp python3-inputtimeout python3-core useradd-uthp"

@@ -1,10 +1,11 @@
-# TODO: This should be a production ready image.
+# Note: this is a devlopment image, not a production image. It is intended for development and testing purposes only.
 SUMMARY = "UTHP Core Image Recipe"
 DESCRIPTION = "A core image recipe for the UTHP project"
 LICENSE = "MIT"
 
 INHERIT += "cve-check"
 
+# poky/core-image.bbclass
 inherit core-image
 
 GLIBC_GENERATE_LOCALES = "en_US.UTF-8"
@@ -12,7 +13,7 @@ IMAGE_LINGUAS = "en-us"
 
 IMAGE_INSTALL = " packagegroup-core-boot ${CORE_IMAGE_EXTRA_INSTALL}"
 
-# The rootfs size is 2.7GB which is adjusted dynamically by bitbake
+# The rootfs size is 2.8GB which is adjusted dynamically by bitbake
 IMAGE_ROOTFS_SIZE = "2797152"
 
 CORE_OS = " \
@@ -25,6 +26,8 @@ CORE_OS = " \
     locale-base-en-gb \
     uthp-serial-services \
     uthp-tcp-services \
+    useradd-uthp \
+    uthp-tests \
  "
 
 KERNEL_EXTRA_INSTALL = " \
@@ -157,6 +160,7 @@ PYTHON3_TOOLS = " \
     python3-platformdirs \
     python3-click \
     python3-rpds-py \
+    python3-pytest \
  "
 
 IMAGE_INSTALL += " \
@@ -168,20 +172,3 @@ IMAGE_INSTALL += " \
     ${PYTHON_TOOLS} \
     ${PYTHON3_TOOLS} \
  "
-
-update_sudoers(){
-    sed -i 's/# %sudo/%sudo/' ${IMAGE_ROOTFS}/etc/sudoers
-}
-
-inherit extrausers
-PASS = '\$6\$kXDp5Q1Ki1mAOJ7U\$Bz7DjUHuRjnO/oPL6Xc3/TOiknek/eXiXIL8wiU00VpNJmd9dMayr6RvsY5Ip9DZ7Q9CAZEhFIKAgYRJf8ZgV0'
-EXTRA_USERS_PARAMS = " \
-    useradd -u 1000 -d /home/uthp -s /bin/bash -p '${PASS}' uthp; \
-    usermod -aG sudo uthp; \
-    passwd-expire uthp; \
-    usermod -s /bin/bash root; \
-    usermod -p '${PASS}' root; \
-    passwd-expire root; \
-	"
-
-ROOTFS_POSTPROCESS_COMMAND += "update_sudoers;"

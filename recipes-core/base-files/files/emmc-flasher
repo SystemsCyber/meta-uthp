@@ -154,31 +154,53 @@ cleanup () {
     rm -rf /mnt/${source}p2
 }
 
-rename_host () {
-	read -p "Enter the serial number for this board: UTHP-R1-" SERIAL_NUMBER
+update_passwd() {
+    local password="$1"
+    echo "Updating UTHP password..."
+    echo "uthp:$password" | sudo chpasswd
 
-	if [[ -z "$SERIAL_NUMBER" ]]; then
-		echo "Serial number cannot be empty."
-		exit 1
-	fi
+    if [[ $? -eq 0 ]]; then
+        echo "Password updated successfully."
+    else
+        echo "Failed to update password." >&2
+        exit 1
+    fi
+}
 
-	# Update /etc/hostname
-	echo "Updating /etc/hostname..."
-	echo "UTHP-R1-$SERIAL_NUMBER" > /etc/hostname
-	echo "Updated /etc/hostname."
+rename_host() {
+    read -p "Enter the serial number for this board (e.g., R1-XXXX): UTHP-R1-" SERIAL_NUMBER
 
-	# Update /etc/hosts
-	echo "Updating /etc/hosts..."
-	if grep -q "127.0.1.1" /etc/hosts; then
-		sed -i "s/^127.0.1.1 .*/127.0.1.1 UTHP-R1-$SERIAL_NUMBER/" /etc/hosts
-	else
-		echo "127.0.1.1 UTHP-R1-$SERIAL_NUMBER" >> /etc/hosts
-	fi
+    if [[ -z "$SERIAL_NUMBER" ]]; then
+        echo "Error: Serial number cannot be empty." >&2
+        exit 1
+    fi
 
-	# Ensure localhost entry exists
-	if ! grep -q "127.0.0.1" /etc/hosts; then
-		echo "127.0.0.1 localhost" >> /etc/hosts
-	fi
+    NEW_HOSTNAME="UTHP-R1-$SERIAL_NUMBER"
+
+    # Update /etc/hostname
+    echo "Updating /etc/hostname to $NEW_HOSTNAME..."
+    echo "$NEW_HOSTNAME" | sudo tee /etc/hostname > /dev/null
+    echo "Updated /etc/hostname."
+
+    # Update /etc/hosts
+    echo "Updating /etc/hosts..."
+    
+    # Ensure 127.0.1.1 entry is correctly set
+    if grep -q "127.0.1.1" /etc/hosts; then
+        sudo sed -i "s/^127.0.1.1 .*/127.0.1.1 $NEW_HOSTNAME/" /etc/hosts
+    else
+        echo "127.0.1.1 $NEW_HOSTNAME" | sudo tee -a /etc/hosts > /dev/null
+    fi
+
+    # Ensure localhost entry exists
+    if ! grep -q "127.0.0.1" /etc/hosts; then
+        echo "127.0.0.1 localhost" | sudo tee -a /etc/hosts > /dev/null
+    fi
+
+    echo "Hostname updated successfully."
+
+    # Update password with new hostname
+    update_passwd "$NEW_HOSTNAME"
 }
 
 # main

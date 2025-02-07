@@ -1,0 +1,25 @@
+From 940658ceee2ab6ee7f4e0282d5274b944c326732 Mon Sep 17 00:00:00 2001
+From: spenc3rb <beersc@colostate.edu>
+Date: Wed, 5 Feb 2025 20:40:50 +0000
+Subject: [PATCH] NOROOTPASS
+Upstream-Status: Inappropriate [configuration]
+---
+ sshd_config | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/sshd_config b/sshd_config
+index e9eaf93..4f44815 100644
+--- a/sshd_config
++++ b/sshd_config
+@@ -31,7 +31,7 @@ Include /etc/ssh/sshd_config.d/*.conf
+ # Authentication:
+ 
+ #LoginGraceTime 2m
+-#PermitRootLogin prohibit-password
++PermitRootLogin no
+ #StrictModes yes
+ #MaxAuthTries 6
+ #MaxSessions 10
+-- 
+2.34.1
+

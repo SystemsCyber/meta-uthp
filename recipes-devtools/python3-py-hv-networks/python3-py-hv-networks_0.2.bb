@@ -15,10 +15,8 @@ do_install(){
     install -m 0755 ${S}/j1708send.py ${D}${bindir}/j1708send
 
     # install everything just in case
-    install -d ${D}${python_sitepackagesdir}/hv_networks
-    install -m 0644 ${S}/hv_networks/* ${D}/usr/lib/python3.12/site-packages/hv_networks/
-    
-    # TODO: add export PYTHONPATH=/usr/lib/python3.12/site-packages/hv_networks-0.2-py3.12.egg/hv_networks/:$PYTHONPATH
+    install -d ${D}${PYTHON_SITEPACKAGES_DIR}/hv_networks
+    install -m 0644 ${S}/hv_networks/* ${D}/${PYTHON_SITEPACKAGES_DIR}/hv_networks/
 }
 
 FILES:${PN} += "*"

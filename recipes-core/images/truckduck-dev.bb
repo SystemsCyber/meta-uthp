@@ -1,4 +1,4 @@
-# TODO: This should be a production ready image.
+# TODO: update the overlays and naming conventions for this image
 SUMMARY = "UTHP Core Image Recipe"
 DESCRIPTION = "A core image recipe for the UTHP project"
 LICENSE = "MIT"

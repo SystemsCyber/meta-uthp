@@ -20,7 +20,7 @@ do_install(){
     cp ${WORKDIR}/plc-dev/plc4trucksduck/src/pru/generated/plc4trucksduck.out ${D}/usr/lib/firmware/am335x-pru0-fw
     cp ${WORKDIR}/plc-dev/plc4trucksduck/src/pru/generated/j17084truckduck.out ${D}/usr/lib/firmware/am335x-pru1-fw
 
-    # user space code
+    # user space code (has to be root to access PRU)
     install -m 0755 ${WORKDIR}/plc-dev/plc4trucksduck/src/arm/plc4trucksduck_host ${D}/usr/bin
     install -m 0755 ${WORKDIR}/plc-dev/plc4trucksduck/src/arm/j17084truckduck_host ${D}/usr/bin
 

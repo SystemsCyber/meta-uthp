@@ -19,8 +19,10 @@
  * SOFTWARE.
 */
 
+// TESTED ON: 02/12/2025 - Working with UTHP 1.0.0
+
 #define PRU_NO 0
-#define BBB_GPIO_PIN 88 // IDLE LINE DETECT: TODO: Test this
+#define BBB_GPIO_PIN 88 // IDLE LINE DETECT: needs to be set in overlays
 #define UART_NUM 4
 
 /* Host-0 Interrupt sets bit 30 in register R31 */
@@ -41,20 +43,20 @@
 #define CHAN_DESC			"Channel 30"
 #define CHAN_PORT			30
 
-/* PLC requires 12 bits of interframe spacing. PLC also operates at 9600
+ /* J1708 requires 10 bits of interframe spacing. J1708 also operates at 9600
  * baud and the clock rate of the PRUs is 200MHz. Also the line is active when
  * its low (digital zero). Thus:
  * bit_time = 1/9600 = 1.04e-4
- * time_for_12_bits = 12 * bit_time
- * num_clock_cycles_for_12_bits = time_for_12_bits * 200000000 ~= 250,000
+ * time_for_10_bits = 10 * bit_time
+ * num_clock_cycles_for_10_bits = time_for_10_bits * 200000000 ~= 208,000
  * Therefore, the code below is checking if the bus is available every half bit.
  */
 #define CYCLES_PER_HALF_BIT 10400
-#define CHECKS_TILL_BUS_IDLE 24
+#define CHECKS_TILL_BUS_IDLE 20
 
 // SSCP485 Datasheet recommended waiting about 1.5 characters of line idle to
 // determine that a message had been sent.
-#define CHECKS_TILL_MSG_FINISHED 13 // 13 * 52 µs = 676 µs
+#define CHECKS_TILL_MSG_FINISHED 11 // 13 * 52 µs = 676 µs
 #define PLC // needed in common.h
 
 #include <stdint.h>
@@ -69,7 +71,7 @@
 
 void main() {
     struct pru_rpmsg_transport transport;
-	uint16_t src = 0;
+    uint16_t src = 0;
     uint16_t dst = 0;
     uint16_t len = 0;
 
@@ -81,31 +83,26 @@ void main() {
     while (1) {
         // Is there a message to transmit?
         if (transmitBuf[0] != 0 || pru_rpmsg_receive(&transport, &src, &dst, transmitBuf, &len) == PRU_RPMSG_SUCCESS) {
+
             if (isBusIdle(CHECKS_TILL_BUS_IDLE)) {
                 // Send MID. Using uartWrite over uartPutC so that it waits to
                 // return until byte is transmitted.
-                uartWrite(transmitBuf, 1);
-                // Arbitration: Send MID, check if what we recv is the same
-                // (no one else is talking) or greater than what we sent
-                // (arbitration win since we have a lower value). If so we
-                // continue talking, otherwise we backoff.
-                __delay_cycles(600000); // wait period for echo back
-                if (uartGetC(&receiveBuf[0])) {
-                    if (transmitBuf[0] <= receiveBuf[0]) {
-                        // Either no one else is talking or we won arbitration
-                        // uartWrite will only return once all bytes have been sent.
-                        uartWrite(transmitBuf + 1, len - 1);
-                        // Clear transmitBuf so we know its been sent
+                uartWrite(transmitBuf, 1); // write the MID
+                __delay_cycles(550000); // wait period for echo back (trust me when I say this exact value is important for reading the echo back and giving enough time for sending the rest of the message)
+                if (uartGetC(&receiveBuf[0])) { // check if there is a message to receive
+                    // Arbitration: Send MID. If we recv anything and our MID is
+                    // greater then we lose arbitration. Otherwise continue
+                    // writing the message.
+                    if (transmitBuf[0] <= receiveBuf[0]) { // either no one else is transmitting or we won arbitration
+                        uartWrite(transmitBuf + 1, len - 1); // write the remaining message
                         memset(transmitBuf, 0, RPMSG_MESSAGE_SIZE);
-                    } else {
-                        // We lost arbitration so read the remaining message.
+                    } else { // darn we lost arbitration
                         uint16_t recvLen = receiveRemainingMessage(&receiveBuf[1]);
-                        recvLen += 1; // add the last byte
                         pru_rpmsg_send(&transport, dst, src, receiveBuf, recvLen+1);
                     }
-                } else {
-                    // Error - the P485 chip should echo first char back
-                    __halt();
+                } else { // SSCP485 did not echo back
+                    // enter a safe error loop until the host resets the PRU
+                    while (1) { __delay_cycles(1000000); }
                 }
             }
         } else if (uartGetC(receiveBuf)) { // Is there anything to receive?

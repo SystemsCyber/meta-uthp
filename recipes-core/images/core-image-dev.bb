@@ -28,6 +28,7 @@ CORE_OS = " \
     uthp-tcp-services \
     useradd-uthp \
     uthp-tests \
+    bash-completion \
  "
 
 KERNEL_EXTRA_INSTALL = " \

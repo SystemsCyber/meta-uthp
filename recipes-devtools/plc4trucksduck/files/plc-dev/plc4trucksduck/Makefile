@@ -91,8 +91,8 @@ install: $(DTB_OFILES)
 	install -m 600 $(PRU_GEN_DIR)/plc4trucksduck.out /lib/firmware/am335x-pru0-fw
 	install -m 644 $(ARM_SRC_DIR)/plc4ultimatetrucksduck.service /etc/systemd/system/
 	install -m 644 $(ARM_SRC_DIR)/j17084ultimatetruckduck.service /etc/systemd/system/
-	chmod +x /usr/bin/plc4trucksduck_host.py
-	chmod +x /usr/bin/j17084truckduck_host.py
+	chmod +x /usr/bin/plc4trucksduck_host
+	chmod +x /usr/bin/j17084truckduck_host
 	@echo NOTE /// You must reboot before you can load $(THIS_DTB_OFILE) ///
 
 .PHONY: all clean install plc j1708

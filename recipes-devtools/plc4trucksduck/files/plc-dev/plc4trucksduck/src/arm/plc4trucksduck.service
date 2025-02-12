@@ -8,6 +8,8 @@ ExecStart=sudo /usr/bin/plc4trucksduck_host
 Restart=on-failure
 Environment=PYTHONUNBUFFERED=1
 User=root
+StandardOutput=file:/var/log/plc4trucksduck_host.log 
+StandardError=file:/var/log/plc4trucksduck_host-errors.log
 
 [Install]
 WantedBy=multi-user.target

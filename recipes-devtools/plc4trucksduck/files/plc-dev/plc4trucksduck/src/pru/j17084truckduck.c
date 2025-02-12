@@ -1,4 +1,4 @@
-/* PLC4TRUCKSDuck (c) 2020 National Motor Freight Traffic Association
+/* PLC4TRUCKSDuck (c) 2024 National Motor Freight Traffic Association
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,6 +20,8 @@
  */
 
 // TESTED ON: 10/17/2024 - Working with UTHP 1.0.0
+// Note: Use this firmware for reading and writing absent of the plc controller (aka. hacking the PLC or J1708 bus)
+// This is due to the SSCP485 transceiver following stricter idle line detection rules than the THVD1410.
 
 #define PRU_NO 1
 #define BBB_GPIO_PIN 40 // fake ILD (not needed for J1708 over PLC.. this is over the THVD1410 transceiver)
@@ -82,9 +84,6 @@ void main() {
     while (1) {
         // Is there a message to transmit?
         if (transmitBuf[0] != 0 || pru_rpmsg_receive(&transport, &src, &dst, transmitBuf, &len) == PRU_RPMSG_SUCCESS) {
-            // send a transmit debug message to the host
-            //uint8_t debugMsg[1] = {0x11};
-            //pru_rpmsg_send(&transport, dst, src, debugMsg, 1);
             if (isBusIdle(CHECKS_TILL_BUS_IDLE)) {
                 // Send MID. Using uartWrite over uartPutC so that it waits to
                 // return until byte is transmitted.
@@ -95,11 +94,7 @@ void main() {
                 if (uartGetC(&receiveBuf[0]) && transmitBuf[0] > receiveBuf[0]) {
                     // We lost arbitration so read the remaining message.
                     uint16_t recvLen = receiveRemainingMessage(&receiveBuf[1]);
-                    // send a debugging message to the host
-                    // uint8_t debugMsg[1] = {0x11};
-                    // pru_rpmsg_send(&transport, dst, src, debugMsg, 1);
-                    recvLen += 1; // add the last byte
-                    pru_rpmsg_send(&transport, dst, src, receiveBuf, recvLen);
+                    pru_rpmsg_send(&transport, dst, src, receiveBuf, recvLen+1);
                 } else {
                     // Either no one else is talking or we won arbitration
                     // uartWrite will only return once all bytes have been sent.

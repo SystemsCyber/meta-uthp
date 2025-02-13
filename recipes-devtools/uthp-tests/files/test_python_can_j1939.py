@@ -4,8 +4,6 @@ import can
 import j1939
 import time
 
-# This test is assumed to be run with the CAN0 interface up and running.
-
 def on_message(priority, pgn, sa, timestamp, data):
     """Receive incoming messages from the bus
 

@@ -3,8 +3,6 @@ import sys
 import subprocess
 import pytest
 
-# This test is assumed to be run with the CAN0 interface up and running.
-
 @pytest.fixture(scope="session", autouse=True)
 def change_working_dir():
     """Change the working directory and update sys.path for imports."""
@@ -45,10 +43,6 @@ def test_cleanup():
     try:
         for f in os.listdir():
             if f.endswith(".log"):
-                # print contents of log files for -s flag
-                with open(f, "r") as file:
-                    print(f"Contents of {f}:")
-                    print(file.read())
                 os.remove(f)
     except Exception as e:
-        pytest.fail(f"Error removing log files: {e}.")
+        pytest.fail(f"Error removing log files: {e}. Might need to run as sudo.")

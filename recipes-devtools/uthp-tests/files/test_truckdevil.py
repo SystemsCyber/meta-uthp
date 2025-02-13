@@ -21,7 +21,7 @@ def test_read():
     """Ensure that the truckdevil read script runs without errors."""
     command = "python3 ./truckdevil.py add_device socketcan can0 500000 run_module read_messages set num_messages 5 print_messages"
     result = subprocess.run(command, shell=True, capture_output=True, text=True)
-    print(result.stdout) # print the output of the command for -s flag
+    print(result.stdout)
 
     assert result.returncode == 0, f"Command failed with return code {result.returncode}"
     assert "error" not in result.stderr.lower(), f"Error in command output: {result.stderr}"

@@ -10,7 +10,7 @@ def test_sigrok_cli_help():
     print("sigrok-cli stderr:", result.stderr)  # For debugging purposes.
 
     assert result.returncode == 0, f"sigrok-cli command failed with return code {result.returncode}"
-
+    
     # Verify that expected usage/help strings are present.
     expected_phrases = [
         "Usage:",
@@ -24,6 +24,6 @@ def test_libsigrokdecode_files_exist():
     """Test that the required libsigrokdecode files exist."""
     file_init = "/usr/share/libsigrokdecode/decoders/can2/__init__.py"
     file_pd = "/usr/share/libsigrokdecode/decoders/can2/pd.py"
-
+    
     assert os.path.isfile(file_init), f"Expected file {file_init} does not exist."
     assert os.path.isfile(file_pd), f"Expected file {file_pd} does not exist."

@@ -5,7 +5,7 @@ import time
 import signal
 import re
 
-# j17084truckduck_host is restarted as a service every time this is run
+# this needs to be run as superuser; j17084truckduck_host is restarted as a service every time this is run
 
 def test_installation():
     """Ensure the hv_networks package is installed."""

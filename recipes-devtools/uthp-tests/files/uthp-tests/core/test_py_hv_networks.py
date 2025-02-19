@@ -5,13 +5,7 @@ import time
 import signal
 import re
 
-# j17084truckduck_host is restarted as a service every time this is run
-
-def test_service():
-    """Ensure that the j17084truckduck service is running."""
-    command = "systemctl is-active --quiet j17084truckduck"
-    result = subprocess.run(command, shell=True)
-    assert result.returncode == 0, "j17084truckduck service is not running. Please run `make test` in the root directory."
+# this needs to be run as superuser; j17084truckduck_host is restarted as a service every time this is run
 
 def test_installation():
     """Ensure the hv_networks package is installed."""

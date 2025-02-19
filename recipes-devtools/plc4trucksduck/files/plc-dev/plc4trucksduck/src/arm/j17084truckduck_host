@@ -13,17 +13,16 @@ import argparse
 import fcntl
 import errno
 
-# Constants for PRU1
-RPMSG_DEV = "/dev/rpmsg_pru31"  # RPMsg device file for PRU1
-PAYLOAD_LEN = 255               # Must match the same in the PRU firmware
-PRU_FW_PATH = "/lib/firmware/am335x-pru1-fw"  # Path to PRU1 firmware
-REMOTE_PROC_PATH = "/sys/class/remoteproc/remoteproc2"  # Remoteproc interface for PRU1
+RPMSG_DEV = "/dev/rpmsg_pru31"  # RPMsg device file
+PAYLOAD_LEN = 255               # Must match the same in the PRU 2 firmware
+PRU_FW_PATH = "/lib/firmware/am335x-pru1-fw"  # Path to PRU 2 firmware (remoteproc2 for pru1)
+REMOTE_PROC_PATH = "/sys/class/remoteproc/remoteproc2"  # Remoteproc interface for PRU 2
 
 UDP_PORTS = (6969, 6970)
 exit_event = threading.Event()
 
 def signal_handler(sig, frame):
-    logging.info("Signal received, exiting...")
+    logging.info("Signal received (SIGINT/SIGTERM), exiting...")
     exit_event.set()
 
 def stop_pru():
@@ -90,31 +89,34 @@ def write_to_pru(rpmsg_fd, sock):
                 break
 
 if __name__ == "__main__":
-    # Parse command-line arguments for verbosity.
+    # Parse command-line arguments for verbosity and log file.
     parser = argparse.ArgumentParser(
-        description="PLC4TRUCKSDuck communication with PRU1 firmware."
+        description="J17084TRUCKDuck communication with PRU 2 firmware."
     )
     parser.add_argument(
         "-v", "--verbose", action="store_true", help="Enable verbose (INFO-level) logging"
     )
+    parser.add_argument(
+        "-l", "--logfile", type=str, default=None, help="Optional file to output logging to"
+    )
     args = parser.parse_args()
 
-    # Configure logging: verbose (-v) enables INFO messages, otherwise warnings.
+    log_kwargs = {
+        "format": "%(asctime)s - %(levelname)s - %(message)s",
+        "filename": args.logfile  # if None, logs will go to stderr.
+    }
     if args.verbose:
-        logging.basicConfig(
-            level=logging.INFO,
-            format="%(asctime)s - %(levelname)s - %(message)s"
-        )
+        log_kwargs["level"] = logging.INFO
     else:
-        logging.basicConfig(
-            level=logging.WARNING,
-            format="%(asctime)s - %(levelname)s - %(message)s"
-        )
+        log_kwargs["level"] = logging.WARNING
 
-    logging.info("Starting main program for PRU1...")
+    logging.basicConfig(**log_kwargs)
+
+    logging.info("Starting main program for PRU 2...")
 
     # Register the signal handler for graceful exit
     signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
     logging.info("Signal handler registered.")
 
     # Create UDP socket and bind to the desired port.

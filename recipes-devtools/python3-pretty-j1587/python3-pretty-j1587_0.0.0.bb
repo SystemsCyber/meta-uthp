@@ -4,8 +4,8 @@ LICENSE = "CLOSED"
 LIC_FILES_CHKSUM = "file://${THISDIR}/LICENSE;md5=9cbb8e86b6798efc990e6ac9a33a8b14"
 
 # Specify the source file location
-SRC_URI = "git://github.com/ainfosec/pretty_j1587.git;protocol=https;rev=31ac605d1c0dbcf4fde366e278d20382e3617476;branch=master"
-SRC_URI[sha256sum] = "7c72341c6e872d9b9e10a681d77a407e8e2cf4e1b88a315e24bd82a938496ad2"
+# Using this specific fork until the changes are merged into the main branch
+SRC_URI = "git://github.com/Spenc3rB/pretty_j1587;protocol=https;rev=ebd9c4d2377216919c85c45a3da2d168694c68f5;branch=master"
 
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 

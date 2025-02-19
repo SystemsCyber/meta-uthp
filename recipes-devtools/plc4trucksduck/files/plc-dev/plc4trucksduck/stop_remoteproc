@@ -1,5 +1,18 @@
 #!/bin/bash -e
 
+echo "This script will stop the remoteproc1 and remoteproc2 processes."
+echo "Please ensure you are not running any other processes that use the remoteproc1 or remoteproc2."
+read -p "Are you sure you want to stop the remoteproc1 and remoteproc2 processes? (y/n) " -n 1 -r
+echo
+
+if [[ $REPLY =~ ^[Nn]$ ]]; then
+    echo -e "\nPlease ensure you are not running any other processes that use the remoteproc1 or remoteproc2."
+    exit 1
+elif [[ $EUID -ne 0 ]]; then
+    echo -e "\nThis script must be run as root. Please run the script again with sudo."
+    exit 1
+fi
+
 if [ -e /sys/class/remoteproc/remoteproc1/state ]; then
     state=$(cat /sys/class/remoteproc/remoteproc1/state)
     if [ "$state" = "running" ]; then

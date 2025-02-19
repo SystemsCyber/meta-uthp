@@ -102,6 +102,8 @@ void main() {
                     }
                 } else { // SSCP485 did not echo back
                     // enter a safe error loop until the host resets the PRU
+                    memset(receiveBuf, 0, MAX_PAYLOAD_LEN);
+                    memset(transmitBuf, 0, RPMSG_MESSAGE_SIZE);
                     while (1) { __delay_cycles(1000000); }
                 }
             }

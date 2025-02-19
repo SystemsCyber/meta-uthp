@@ -14,16 +14,16 @@ import fcntl
 import errno
 
 RPMSG_DEV = "/dev/rpmsg_pru30"  # RPMsg device file
-PAYLOAD_LEN = 255               # Must match the same in the PRU code
-PRU_FW_PATH = "/lib/firmware/am335x-pru0-fw"  # Path to PRU firmware
-REMOTE_PROC_PATH = "/sys/class/remoteproc/remoteproc1"  # Path to remoteproc interface for PRU0
+PAYLOAD_LEN = 255               # Must match the same in the PRU 1 firmware
+PRU_FW_PATH = "/lib/firmware/am335x-pru0-fw"  # Path to PRU 1 firmware (remoteproc1 for pru0)
+REMOTE_PROC_PATH = "/sys/class/remoteproc/remoteproc1"  # Path to remoteproc interface for PRU 1
 
 UDP_PORTS = (6969, 6970)
 exit_event = threading.Event()
 
 
 def signal_handler(sig, frame):
-    logging.info("Signal received, exiting...")
+    logging.info("Signal received (SIGINT/SIGTERM), exiting...")
     exit_event.set()
 
 
@@ -95,29 +95,31 @@ def write_to_pru(rpmsg_fd, sock):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="PLC4TRUCKSDuck communication with PRU firmware."
+        description="PLC4TRUCKSDuck communication with PRU 1 firmware."
     )
     parser.add_argument(
         "-v", "--verbose", action="store_true", help="Enable verbose (INFO-level) logging"
     )
+    parser.add_argument(
+        "-l", "--logfile", type=str, default=None, help="Optional file to output logging to"
+    )
     args = parser.parse_args()
-
-    # verbose (-v) enables INFO messages, otherwise warnings and above.
+    log_kwargs = {
+        "format": "%(asctime)s - %(levelname)s - %(message)s",
+        "filename": args.logfile  # if None, logs will go to stderr.
+    }
     if args.verbose:
-        logging.basicConfig(
-            level=logging.INFO,
-            format="%(asctime)s - %(levelname)s - %(message)s"
-        )
+        log_kwargs["level"] = logging.INFO
     else:
-        logging.basicConfig(
-            level=logging.WARNING,
-            format="%(asctime)s - %(levelname)s - %(message)s"
-        )
+        log_kwargs["level"] = logging.WARNING
 
-    logging.info("Starting main program...")
+    logging.basicConfig(**log_kwargs)
+
+    logging.info("Starting main program for PRU 1...")
 
     # register a signal handler for SIGINT that sets an event to exit the threads
     signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
     logging.info("Signal handler registered.")
 
     sock = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)

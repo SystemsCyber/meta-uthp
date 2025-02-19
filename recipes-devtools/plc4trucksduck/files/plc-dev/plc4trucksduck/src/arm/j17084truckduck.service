@@ -4,12 +4,10 @@ After=network.target remoteproc.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/j17084truckduck_host
+ExecStart=/usr/bin/j17084truckduck_host -v -l /var/log/j17084truckduck.log
 Restart=on-failure
 User=root
 Environment=PYTHONUNBUFFERED=1
-StandardOutput=file:/var/log/j17084truckduck.log
-StandardError=file:/var/log/j17084truckduck-errors.log
 
 
 [Install]

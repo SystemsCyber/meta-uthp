@@ -27,6 +27,9 @@ do_install(){
     # services
     install -m 0755 ${WORKDIR}/plc-dev/plc4trucksduck/src/arm/j17084truckduck.service ${D}/usr/lib/systemd/system/j17084truckduck.service
     install -m 0755 ${WORKDIR}/plc-dev/plc4trucksduck/src/arm/plc4trucksduck.service ${D}/usr/lib/systemd/system/plc4trucksduck.service
+
+    # just in case the user wants to force stop the PRU
+    ln -s ${WORKDIR}/plc-dev/plc4trucksduck/stop_remoteproc ${D}/usr/bin/stop_remoteproc
 }
 
 FILES:${PN} += "${TARGET_DIR} \

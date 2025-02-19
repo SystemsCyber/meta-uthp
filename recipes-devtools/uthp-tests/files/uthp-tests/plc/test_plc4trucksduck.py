@@ -4,14 +4,15 @@ import importlib
 import time
 import signal
 import re
+import os
 
-# j17084truckduck_host is restarted as a service every time this is run
+# plc4trucksduck_host needs to be restarted as a service every time this is run
 
 def test_service():
-    """Ensure that the j17084truckduck service is running."""
-    command = "systemctl is-active --quiet j17084truckduck"
+    """Ensure that the plc4trucksduck service is running."""
+    command = "systemctl is-active --quiet plc4trucksduck"
     result = subprocess.run(command, shell=True)
-    assert result.returncode == 0, "j17084truckduck service is not running. Please run `make test` in the root directory."
+    assert result.returncode == 0, "plc4trucksduck service is not running. Please run `make test` in the root directory."
 
 def test_installation():
     """Ensure the hv_networks package is installed."""
@@ -27,7 +28,7 @@ def test_send():
     print(result.stdout) # print the output of the command for -s flag
     assert result.returncode == 0, f"Command failed with return code {result.returncode}"
     assert "error" not in result.stderr.lower(), f"Error in command output: {result.stderr}"  
-    with open("/var/log/j17084truckduck.log", "r") as log_file:
+    with open("/var/log/plc4trucksduck.log", "r") as log_file:
         log = log_file.read()
     assert re.search(r"UDP", log), "Message not sent successfully"
     
@@ -42,3 +43,6 @@ def test_receive():
     print(result[0]) # stdout
     assert "error" not in result[1].lower(), f"Error in command output: {result[1]}"
 
+def test_pru_method_rpmsg():
+    """Ensure that the PRU method for rpmsg available in sysfs """
+    assert os.path.isdir("/sys/class/rpmsg/") == True, "PRU method for rpmsg not available in sysfs"

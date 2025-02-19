@@ -68,7 +68,7 @@ bitbake core-image
 ```
 > DO NOT MODIFY ANYTHING while the build is running. It will take a while to complete for the first time. Maybe go get a coffee or something:
 ```shell
-tmux new-session -d -s core-image 'bitbake core-image'
+tmux new-session -d -s core-image 'bitbake <image>'
 ```
 After the image is complete, you can flash it to your device from 'deploy-ti/images/uthp/core-image-uthp.rootfs.wic.xz' with your favorite flashing tool (tested with balenaEtcher).
 

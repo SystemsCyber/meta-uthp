@@ -1,14 +1,13 @@
 [Unit]
-Description=J17084UTDuck Service
+Description=PLC4UTDuck Service
 After=network.target remoteproc.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/j17084truckduck_host -v -l /var/log/j17084truckduck.log
+ExecStart=sudo /usr/bin/plc4trucksduck_host
 Restart=on-failure
-User=root
 Environment=PYTHONUNBUFFERED=1
-
 
 [Install]
 WantedBy=multi-user.target
+

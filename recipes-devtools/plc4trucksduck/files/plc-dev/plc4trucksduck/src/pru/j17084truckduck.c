@@ -1,4 +1,4 @@
-/* PLC4TRUCKSDuck (c) 2024 National Motor Freight Traffic Association
+/* PLC4TRUCKSDuck (c) 2020 National Motor Freight Traffic Association
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,8 +20,6 @@
  */
 
 // TESTED ON: 10/17/2024 - Working with UTHP 1.0.0
-// Note: Use this firmware for reading and writing absent of the plc controller (aka. hacking the PLC or J1708 bus)
-// This is due to the SSCP485 transceiver following stricter idle line detection rules than the THVD1410.
 
 #define PRU_NO 1
 #define BBB_GPIO_PIN 40 // fake ILD (not needed for J1708 over PLC.. this is over the THVD1410 transceiver)

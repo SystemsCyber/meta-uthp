@@ -41,7 +41,7 @@ int __inline isBusIdle(uint8_t numChecks) {
         }
         __delay_cycles(CYCLES_PER_HALF_BIT); // Wait for half bit time (~52 µs)
         #elif defined(PLC)
-        if(readGpioPin(BBB_GPIO_PIN) == 0) { // ILD pin is low = bus is active
+        if(readGpioPin(BBB_GPIO_PIN) == 0) {
             // Bus is active, reset idle detection
             return 0; // Bus is not idle
         }

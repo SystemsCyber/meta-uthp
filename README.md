@@ -35,7 +35,7 @@ The meta-uthp layer depends on the following layers:
 - **URI**: meta-ti-extras  
   **branch**: scarthgap
 
-- **URI**: meta-ti-beagle
+- **URI**: meta-ti-beagle  
   **branch**: scarthgap
 
 ## From scratch:

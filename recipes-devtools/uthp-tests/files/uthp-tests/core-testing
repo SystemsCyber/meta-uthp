@@ -25,7 +25,7 @@ else
     # ensure the standard j1708 service is running and not the plc4trucks service
     sudo systemctl stop plc4trucksduck.service
     sudo systemctl stop j17084truckduck.service
-    sudo sysatemctl start j17084truckduck.service
+    sudo systemctl start j17084truckduck.service
     echo "Environment setup should be complete... waiting for user to confirm hardware is ready."
     read -p "Press any key to continue..."
     echo "Starting the core uthp tests..."

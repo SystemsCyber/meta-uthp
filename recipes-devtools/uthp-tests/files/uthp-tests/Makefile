@@ -27,9 +27,10 @@ reset:
 reset-remote:
 	# TODO: Add remote clean up commands here    
 
-post-production:
+production-ready: reset
 	# TODO: Add post production ready commands here (clean up the uthp tests directory)
-	rm -rf /home/uthp/testing/
+	rm -rf /home/uthp/uthp-tests
+	passwd --expire uthp
 
 create-log-dir:
 	mkdir -p $(LOG_DIR)

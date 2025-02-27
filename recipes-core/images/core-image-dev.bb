@@ -26,9 +26,7 @@ CORE_OS = " \
     locale-base-en-gb \
     uthp-serial-services \
     uthp-tcp-services \
-    useradd-uthp \
     uthp-tests \
-    bash-completion \
  "
 
 KERNEL_EXTRA_INSTALL = " \
@@ -173,3 +171,12 @@ IMAGE_INSTALL += " \
     ${PYTHON_TOOLS} \
     ${PYTHON3_TOOLS} \
  "
+
+inherit extrausers
+# let's at least make sure the pre-production image has some security... generate a password hash for 'root' using our quick script generate-preproduction-password.sh
+HASH_PASS = "\$6\$fJxcAKMWA84wS4sT\$BF5XVhI6eyEvu7w3k8D8lPRttzMiY72qloPOolJo1pv7siU1Vsa49IqBtf6JUNvZ.Acz0WCYLLLWPFF0ehJDg/"
+EXTRA_USERS_PARAMS = " \
+    usermod -s /bin/bash root; \
+    usermod -p '${HASH_PASS}' root; \
+    passwd-expire root; \
+	"

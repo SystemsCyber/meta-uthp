@@ -133,7 +133,7 @@ copy_partitions () {
 	flush_cache
 
     echo "rsync: /mnt/${source}p2/ -> /mnt/${destination}p2/"
-    rsync -aAX /mnt/${source}p2/ /mnt/${destination}p2/ --exclude={/dev/*,/proc/*,/sys/*,/tmp/*,/run/*,/mnt/*,/media/*,/lost+found,/boot/*} || write_failure
+    rsync -aAX /mnt/${source}p2/ /mnt/${destination}p2/ --exclude={/dev/*,/proc/*,/sys/*,/tmp/*,/run/*,/mnt/*,/media/*,/lost+found} || write_failure
     flush_cache
 }
 
@@ -152,19 +152,6 @@ cleanup () {
     umount /mnt/${source}p2
     rm -rf /mnt/${source}p1
     rm -rf /mnt/${source}p2
-}
-
-update_passwd() {
-    local password="$1"
-    echo "Updating UTHP password..."
-    echo "uthp:$password" | sudo chpasswd
-
-    if [[ $? -eq 0 ]]; then
-        echo "Password updated successfully."
-    else
-        echo "Failed to update password." >&2
-        exit 1
-    fi
 }
 
 rename_host() {
@@ -198,24 +185,43 @@ rename_host() {
     fi
 
     echo "Hostname updated successfully."
-
-    # Update password with new hostname
-    update_passwd "$NEW_HOSTNAME"
+    echo "uthp:$NEW_HOSTNAME"
 }
 
 # main
-echo "==> eMMC Flasher"
-# Check if user has sudo privileges
-    if [ "$EUID" -ne 0 ]
+echo "==> START: UTHP eMMC Flasher"
+# check if user has sudo privileges
+if [ "$EUID" -ne 0 ]
     then echo "Please run as root"
-    echo " "
+         echo
+         exit 1
+fi
+# update-overlays
+echo "==> Updating Device Tree Overlays"
+sudo update-overlays
+# update the time
+echo "==> Updating Time"
+sudo update-time
+# update the package list
+if ! sudo apt update; then
+    echo "UTHP needs to be connected to the internet to update the package list."
+    echo 
     exit 1
-    fi
-# 1. start leds
+fi
+# install sigrok firmware from the debian apt repository
+# TODO: install this via a recipe
+echo "==> Installing sigrok firmware"
+sudo apt install sigrok-firmware-fx2lafw 
+# add user
+echo "==> Generating Post-Production Image Data"
+adduser --home /home/uthp --shell /bin/bash uthp
+rename_host | chpasswd
+passwd --expire uthp
+usermod -aG sudo uthp
+echo "==> User 'uthp' added"
+# start leds
 cylon_leds & CYLON_PID=$!
-# 2. rename host
-rename_host
-# 3. erase emmc
+# erase emmc
 echo "==> Erasing eMMC"
 flush_cache
 dd if=/dev/zero of=/dev/${destination} bs=1M count=108
@@ -223,25 +229,25 @@ sync
 dd if=/dev/${destination} of=/dev/null bs=1M count=108
 sync
 flush_cache
-# 4. partition emmc
+# partition emmc
 echo "==> Partitioning eMMC"
 partition_drive
-# 5. format partitions
+# format partitions
 echo "==> Formatting eMMC"
 format_partitions
-# 6. copy partitions
+# copy partitions (this takes up a lot of time and CPU resources)
 echo "==> Copying eMMC"
 copy_partitions
-# 7. regenerate ssh keys
+# regenerate ssh keys
 echo "==> Regenerating SSH keys"
 regenerate_ssh_keys
-# 8. regenerate fstab
+# regenerate fstab
 echo "==> Regenerating fstab"
 sed -i "s/${source}/${destination}/g" /mnt/${destination}p2/etc/fstab
-# 9. cleanup
+# cleanup
 echo "==> Cleaning up"
 cleanup
-# 10. stop leds
+# stop leds
 kill $CYLON_PID > /dev/null 2>&1
 echo "==> eMMC Flashing Complete"
-echo "==> Please power off your device, remove the SD card, and power it back on"
+echo "==> END: Please power off your device, remove the SD card, and power it back on"

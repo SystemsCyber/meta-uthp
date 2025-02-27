@@ -1,4 +1,5 @@
 #!/bin/bash
+# TODO: try to add this to the recipe instead of the image
 # Define the symlink path and target
 SYMLINK="/usr/lib/python3.12/site-packages/rpds/rpds.so"
 TARGET="/usr/lib/python3.12/site-packages/rpds/rpds.cpython-312-armv7l-linux-gnueabihf.so"

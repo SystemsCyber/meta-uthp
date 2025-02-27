@@ -1,4 +1,0 @@
-#!/bin/bash
-# TODO: how do we actually ensure this user owns the home directory at first boot?
-chown -R uthp:uthp /home/uthp
-exit 0

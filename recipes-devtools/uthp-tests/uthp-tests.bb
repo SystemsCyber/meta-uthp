@@ -12,7 +12,10 @@ do_install() {
     install -d ${D}/home/uthp
     # Copy the uthp-tests directory into the image's /home/uthp
     cp -r ${S}/uthp-tests ${D}/home/uthp/
+
+    chmod +x ${D}/home/uthp/uthp-tests/core-testing
+    chmod +x ${D}/home/uthp/uthp-tests/plc-testing
 }
 
 FILES:${PN} = "/home/uthp/uthp-tests"
-RDEPENDS:${PN} = "python3-pytest"
+RDEPENDS:${PN} = "python3-pytest bash"

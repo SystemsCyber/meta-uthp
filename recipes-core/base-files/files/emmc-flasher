@@ -227,7 +227,6 @@ echo "==> Installing sigrok firmware"
 sudo apt install sigrok-firmware-fx2lafw 
 # add user
 echo "==> Generating Post-Production Image Data"
-# NOTE: chpasswd issue, timesync issue; no truck splash screen for uthp; uthp direcotry not owned by uthp; 
 rename_host
 # check if the user 'uthp' already exists
 if id "uthp" &>/dev/null; then

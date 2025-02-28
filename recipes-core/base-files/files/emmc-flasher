@@ -185,7 +185,6 @@ rename_host() {
     fi
 
     echo "Hostname updated successfully."
-    echo "uthp:$NEW_HOSTNAME"
 }
 
 # main
@@ -196,9 +195,23 @@ if [ "$EUID" -ne 0 ]
          echo
          exit 1
 fi
+# always ensure the emmc is zerod out first
+# erase emmc
+echo "==> Erasing eMMC"
+flush_cache
+dd if=/dev/zero of=/dev/${destination} bs=1M count=108
+sync
+dd if=/dev/${destination} of=/dev/null bs=1M count=108
+sync
 # update-overlays
-echo "==> Updating Device Tree Overlays"
-sudo update-overlays
+if grep -q "FDTOVERLAYS" /boot/p1/extlinux/extlinux.conf; then
+	echo "==> Device Tree Overlays should already be updated"
+else
+	echo "==> Updating Device Tree Overlays"
+	sudo update-overlays
+	sudo reboot
+	exit 0
+fi
 # update the time
 echo "==> Updating Time"
 sudo update-time
@@ -214,20 +227,24 @@ echo "==> Installing sigrok firmware"
 sudo apt install sigrok-firmware-fx2lafw 
 # add user
 echo "==> Generating Post-Production Image Data"
-adduser --home /home/uthp --shell /bin/bash uthp
-rename_host | chpasswd
+# NOTE: chpasswd issue, timesync issue; no truck splash screen for uthp; uthp direcotry not owned by uthp; 
+rename_host
+# check if the user 'uthp' already exists
+if id "uthp" &>/dev/null; then
+	deluser uthp
+fi
+echo "Creating user 'uthp'..."
+useradd -d /home/uthp -s /bin/bash uthp
+echo "uthp:$NEW_HOSTNAME" | chpasswd
 passwd --expire uthp
 usermod -aG sudo uthp
 echo "==> User 'uthp' added"
+# lock root account
+echo "==> Locking root account"
+passwd -l root
 # start leds
 cylon_leds & CYLON_PID=$!
-# erase emmc
-echo "==> Erasing eMMC"
-flush_cache
-dd if=/dev/zero of=/dev/${destination} bs=1M count=108
-sync
-dd if=/dev/${destination} of=/dev/null bs=1M count=108
-sync
+# flush cache
 flush_cache
 # partition emmc
 echo "==> Partitioning eMMC"

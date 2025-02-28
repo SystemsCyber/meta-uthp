@@ -1,5 +1,5 @@
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
-SRC_URI += "file://init-uthp \
+SRC_URI += "file://init-uthp.sh \
             file://fstab \
             file://.bashrc \
             file://.bashrc-root \
@@ -23,9 +23,9 @@ SRC_URI += "file://J1939db.json \
 
 do_install:append() {
 
-    # Profile setups
+    # Profile setups (has to be .sh extension for profile to pick it up)
     install -d ${D}${sysconfdir}/profile.d
-    install -m 0755 ${WORKDIR}/init-uthp ${D}${sysconfdir}/profile.d/init-uthp
+    install -m 0755 ${WORKDIR}/init-uthp.sh ${D}${sysconfdir}/profile.d/init-uthp.sh
 
     # fstab
     install -m 0644 ${WORKDIR}/fstab ${D}${sysconfdir}/fstab

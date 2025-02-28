@@ -41,7 +41,7 @@ if check_internet; then
     select_timezone
 
     timedatectl set-ntp true
-    timedatectl status | grep "NTP synchronized: yes" > /dev/null
+    timedatectl status | grep -q "System clock synchronized: yes" > /dev/null
 
     if [ $? -eq 0 ]; then
         echo "System time synchronized with internet."

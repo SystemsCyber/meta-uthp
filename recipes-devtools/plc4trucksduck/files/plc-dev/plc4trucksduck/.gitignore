@@ -30,7 +30,7 @@
 
 # Executables
 *.exe
-*.out
+# *.out --> plc4trucksduck
 *.app
 *.i*86
 *.x86_64
@@ -50,9 +50,11 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
-src/arm/build/*
-src/pru/generated/*
-src/pru/build/*
+# src/arm/build/*
+# src/pru/generated/*
+# src/pru/build/*
+*.asm
+*.pp
 
 sourceme
 makeme

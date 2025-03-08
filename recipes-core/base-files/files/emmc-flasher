@@ -2,55 +2,60 @@
 source='mmcblk0'
 destination='mmcblk1'
 
+# fancy color codes
+BLUE='\033[1;34m'
+NC='\033[0m' # no color
+RED='\033[1;31m'
+
 # helper functions
 flush_cache () {
-	sync
-	blockdev --flushbufs /dev/${destination}
+    sync
+    blockdev --flushbufs /dev/${destination}
 }
 
 cylon_leds () {
-	if [ -e /sys/class/leds/beaglebone\:green\:usr0/trigger ] ; then
-		BASE=/sys/class/leds/beaglebone\:green\:usr
-		echo none > ${BASE}0/trigger
-		echo none > ${BASE}1/trigger
-		echo none > ${BASE}2/trigger
-		echo none > ${BASE}3/trigger
+    if [ -e /sys/class/leds/beaglebone\:green\:usr0/trigger ] ; then
+        BASE=/sys/class/leds/beaglebone\:green\:usr
+        echo none > ${BASE}0/trigger
+        echo none > ${BASE}1/trigger
+        echo none > ${BASE}2/trigger
+        echo none > ${BASE}3/trigger
 
-		STATE=1
-		while : ; do
-			case $STATE in
-			1)	echo 255 > ${BASE}0/brightness
-				echo 0   > ${BASE}1/brightness
-				STATE=2
-				;;
-			2)	echo 255 > ${BASE}1/brightness
-				echo 0   > ${BASE}0/brightness
-				STATE=3
-				;;
-			3)	echo 255 > ${BASE}2/brightness
-				echo 0   > ${BASE}1/brightness
-				STATE=4
-				;;
-			4)	echo 255 > ${BASE}3/brightness
-				echo 0   > ${BASE}2/brightness
-				STATE=5
-				;;
-			5)	echo 255 > ${BASE}2/brightness
-				echo 0   > ${BASE}3/brightness
-				STATE=6
-				;;
-			6)	echo 255 > ${BASE}1/brightness
-				echo 0   > ${BASE}2/brightness
-				STATE=1
-				;;
-			*)	echo 255 > ${BASE}0/brightness
-				echo 0   > ${BASE}1/brightness
-				STATE=2
-				;;
-			esac
-			sleep 0.1
-		done
-	fi
+        STATE=1
+        while : ; do
+            case $STATE in
+            1)	echo 255 > ${BASE}0/brightness
+                echo 0   > ${BASE}1/brightness
+                STATE=2
+                ;;
+            2)	echo 255 > ${BASE}1/brightness
+                echo 0   > ${BASE}0/brightness
+                STATE=3
+                ;;
+            3)	echo 255 > ${BASE}2/brightness
+                echo 0   > ${BASE}1/brightness
+                STATE=4
+                ;;
+            4)	echo 255 > ${BASE}3/brightness
+                echo 0   > ${BASE}2/brightness
+                STATE=5
+                ;;
+            5)	echo 255 > ${BASE}2/brightness
+                echo 0   > ${BASE}3/brightness
+                STATE=6
+                ;;
+            6)	echo 255 > ${BASE}1/brightness
+                echo 0   > ${BASE}2/brightness
+                STATE=1
+                ;;
+            *)	echo 255 > ${BASE}0/brightness
+                echo 0   > ${BASE}1/brightness
+                STATE=2
+                ;;
+            esac
+            sleep 0.1
+        done
+    fi
 }
 
 partition_drive () {
@@ -81,65 +86,65 @@ flush_cache
 }
 
 write_failure () {
-	echo "writing to [${destination}] failed..."
+    echo -e "${RED}writing to [${destination}] failed...${NC}"
 
-	[ -e /proc/$CYLON_PID ]  && kill $CYLON_PID > /dev/null 2>&1
+    [ -e /proc/$CYLON_PID ]  && kill $CYLON_PID > /dev/null 2>&1
 
-	if [ -e /sys/class/leds/beaglebone\:green\:usr0/trigger ] ; then
-		echo heartbeat > /sys/class/leds/beaglebone\:green\:usr0/trigger
-		echo heartbeat > /sys/class/leds/beaglebone\:green\:usr1/trigger
-		echo heartbeat > /sys/class/leds/beaglebone\:green\:usr2/trigger
-		echo heartbeat > /sys/class/leds/beaglebone\:green\:usr3/trigger
-	fi
-	echo "-----------------------------"
-	flush_cache
-	umount /mnt/${destination}p1 || true
-	umount /mnt/${destination}p2 || true
+    if [ -e /sys/class/leds/beaglebone\:green\:usr0/trigger ] ; then
+        echo heartbeat > /sys/class/leds/beaglebone\:green\:usr0/trigger
+        echo heartbeat > /sys/class/leds/beaglebone\:green\:usr1/trigger
+        echo heartbeat > /sys/class/leds/beaglebone\:green\:usr2/trigger
+        echo heartbeat > /sys/class/leds/beaglebone\:green\:usr3/trigger
+    fi
+    echo -e "${RED}-----------------------------${NC}"
+    flush_cache
+    umount /mnt/${destination}p1 || true
+    umount /mnt/${destination}p2 || true
     umount /mnt/${source}p1 || true
     umount /mnt/${source}p2 || true
-	exit
+    exit
 }
 
 format_partitions () {
     # Format the first partition
-    echo "Formatting first partition"
+    echo -e "${BLUE}Formatting first partition${NC}"
     umount /dev/${destination}p1 || true; echo 'y' | mkfs.vfat -F 32 /dev/${destination}p1; flush_cache
 
     # Format the second partition
-    echo "Formatting second partition"
+    echo -e "${BLUE}Formatting second partition${NC}"
     umount /dev/${destination}p2 || true; echo 'y' | mkfs.ext4 /dev/${destination}p2; flush_cache
 }
 
 copy_partitions () {
     # Prepare the system to copy partitions
     mkdir -p /mnt/${destination}p1
-    mount /dev/${destination}p1 /mnt/${destination}p1
+    mount /dev/${destination}p1 /mnt/${destination}p1 || write_failure
     mkdir -p /mnt/${destination}p2
-    mount /dev/${destination}p2 /mnt/${destination}p2
+    mount /dev/${destination}p2 /mnt/${destination}p2 || write_failure
     mkdir -p /mnt/${source}p1
-    mount /dev/${source}p1 /mnt/${source}p1
+    mount /dev/${source}p1 /mnt/${source}p1 || write_failure
     mkdir -p /mnt/${source}p2
-    mount /dev/${source}p2 /mnt/${source}p2
+    mount /dev/${source}p2 /mnt/${source}p2 || write_failure
 
     # Make sure the BootLoader gets copied first:
-	cp -v /mnt/${source}p1/MLO /mnt/${destination}p1/MLO || write_failure
-	flush_cache
+    cp -v /mnt/${source}p1/MLO /mnt/${destination}p1/MLO || write_failure
+    flush_cache
 
-	cp -v /mnt/${source}p1/u-boot.img /mnt/${destination}p1/u-boot.img || write_failure
-	flush_cache
+    cp -v /mnt/${source}p1/u-boot.img /mnt/${destination}p1/u-boot.img || write_failure
+    flush_cache
 
-	echo "rsync: /mnt/${source}p1/ -> /mnt/${destination}p1/"
-	rsync -aAX /mnt/${source}p1/ /mnt/${destination}p1/ --exclude={MLO,u-boot.img} || write_failure
-	flush_cache
+    echo -e "${BLUE}rsync: /mnt/${source}p1/ -> /mnt/${destination}p1/${NC}"
+    rsync -aAX /mnt/${source}p1/ /mnt/${destination}p1/ --exclude={MLO,u-boot.img} || write_failure
+    flush_cache
 
-    echo "rsync: /mnt/${source}p2/ -> /mnt/${destination}p2/"
+    echo -e "${BLUE}rsync: /mnt/${source}p2/ -> /mnt/${destination}p2/${NC}"
     rsync -aAX /mnt/${source}p2/ /mnt/${destination}p2/ --exclude={/dev/*,/proc/*,/sys/*,/tmp/*,/run/*,/mnt/*,/media/*,/lost+found} || write_failure
     flush_cache
 }
 
 regenerate_ssh_keys () {
     # Regenerate SSH keys
-    echo "==> Applying SSH Key and machine-id Regeneration trick"
+    echo -e "${BLUE}==> Applying SSH Key and machine-id Regeneration trick${NC}"
     # ssh keys and machine-id will now get regenerated on the next bootup
     touch /mnt/${destination}p2/etc/ssh/ssh.regenerate
     rm -f /mnt/${destination}p2/etc/machine-id || true
@@ -158,19 +163,19 @@ rename_host() {
     read -p "Enter the serial number for this board (e.g., R1-XXXX): UTHP-R1-" SERIAL_NUMBER
 
     if [[ -z "$SERIAL_NUMBER" ]]; then
-        echo "Error: Serial number cannot be empty." >&2
+        echo -e "${RED}Error: Serial number cannot be empty.${NC}" >&2
         exit 1
     fi
 
     NEW_HOSTNAME="UTHP-R1-$SERIAL_NUMBER"
 
     # Update /etc/hostname
-    echo "Updating /etc/hostname to $NEW_HOSTNAME..."
+    echo -e "${BLUE}Updating /etc/hostname to $NEW_HOSTNAME...${NC}"
     echo "$NEW_HOSTNAME" | sudo tee /etc/hostname > /dev/null
-    echo "Updated /etc/hostname."
+    echo -e "${BLUE}Updated /etc/hostname.${NC}"
 
     # Update /etc/hosts
-    echo "Updating /etc/hosts..."
+    echo -e "${BLUE}Updating /etc/hosts...${NC}"
     
     # Ensure 127.0.1.1 entry is correctly set
     if grep -q "127.0.1.1" /etc/hosts; then
@@ -184,20 +189,26 @@ rename_host() {
         echo "127.0.0.1 localhost" | sudo tee -a /etc/hosts > /dev/null
     fi
 
-    echo "Hostname updated successfully."
+    echo -e "${BLUE}Hostname updated successfully.${NC}"
 }
 
 # main
-echo "==> START: UTHP eMMC Flasher"
+echo -e "${BLUE}==> START: UTHP eMMC Flasher${NC}"
 # check if user has sudo privileges
 if [ "$EUID" -ne 0 ]
-    then echo "Please run as root"
+    then echo -e "${RED}Please run as root${NC}"
          echo
          exit 1
 fi
+echo -e "${BLUE}==> Checking if script is running from the correct storage device.${NC}"
+if df -h | grep -q "/dev/mmcblk1"; then
+    echo -e "${RED}This script is intended to be run from a microSD card.${NC}"
+    echo
+    exit 1
+fi
 # always ensure the emmc is zerod out first
 # erase emmc
-echo "==> Erasing eMMC"
+echo -e "${BLUE}==> Erasing eMMC${NC}"
 flush_cache
 dd if=/dev/zero of=/dev/${destination} bs=1M count=108
 sync
@@ -205,65 +216,66 @@ dd if=/dev/${destination} of=/dev/null bs=1M count=108
 sync
 # update-overlays
 if grep -q "FDTOVERLAYS" /boot/p1/extlinux/extlinux.conf; then
-	echo "==> Device Tree Overlays should already be updated"
+    echo -e "${BLUE}==> Device Tree Overlays should already be updated${NC}"
 else
-	echo "==> Updating Device Tree Overlays"
-	sudo update-overlays
-	sudo reboot
-	exit 0
+    echo -e "${BLUE}==> Updating Device Tree Overlays${NC}"
+    sudo update-overlays
+    sudo reboot
+    exit 0
 fi
-# update the time
-echo "==> Updating Time"
-sudo update-time
-# update the package list
-if ! sudo apt update; then
-    echo "UTHP needs to be connected to the internet to update the package list."
+if ! ping -q -c 1 -W 1 google.com > /dev/null; then
+    echo -e "${RED}UTHP needs to be connected to the internet to update the package list.${NC}"
     echo 
     exit 1
 fi
+# update the package list
+sudo apt update
+# update the time
+echo -e "${BLUE}==> Updating Time${NC}"
+sudo update-time
+# update the package list
 # install sigrok firmware from the debian apt repository
 # TODO: install this via a recipe
-echo "==> Installing sigrok firmware"
+echo -e "${BLUE}==> Installing sigrok firmware${NC}"
 sudo apt install sigrok-firmware-fx2lafw 
 # add user
-echo "==> Generating Post-Production Image Data"
+echo -e "${BLUE}==> Generating Post-Production Image Data${NC}"
 rename_host
 # check if the user 'uthp' already exists
 if id "uthp" &>/dev/null; then
-	deluser uthp
+    deluser uthp
 fi
-echo "Creating user 'uthp'..."
+echo -e "${BLUE}Creating user 'uthp'...${NC}"
 useradd -d /home/uthp -s /bin/bash uthp
 echo "uthp:$NEW_HOSTNAME" | chpasswd
-passwd --expire uthp
 usermod -aG sudo uthp
-echo "==> User 'uthp' added"
+echo -e "${BLUE}==> User 'uthp' added${NC}"
 # lock root account
-echo "==> Locking root account"
+echo -e "${BLUE}==> Locking root account${NC}"
 passwd -l root
 # start leds
 cylon_leds & CYLON_PID=$!
 # flush cache
 flush_cache
 # partition emmc
-echo "==> Partitioning eMMC"
+echo -e "${BLUE}==> Partitioning eMMC${NC}"
 partition_drive
 # format partitions
-echo "==> Formatting eMMC"
+echo -e "${BLUE}==> Formatting eMMC${NC}"
 format_partitions
 # copy partitions (this takes up a lot of time and CPU resources)
-echo "==> Copying eMMC"
+echo -e "${BLUE}==> Copying eMMC${NC}"
 copy_partitions
 # regenerate ssh keys
-echo "==> Regenerating SSH keys"
+echo -e "${BLUE}==> Regenerating SSH keys${NC}"
 regenerate_ssh_keys
 # regenerate fstab
-echo "==> Regenerating fstab"
+echo -e "${BLUE}==> Regenerating fstab${NC}"
 sed -i "s/${source}/${destination}/g" /mnt/${destination}p2/etc/fstab
 # cleanup
-echo "==> Cleaning up"
+echo -e "${BLUE}==> Cleaning up${NC}"
 cleanup
 # stop leds
 kill $CYLON_PID > /dev/null 2>&1
-echo "==> eMMC Flashing Complete"
-echo "==> END: Please power off your device, remove the SD card, and power it back on"
+echo -e "${BLUE}==> eMMC Flashing Complete${NC}"
+echo -e "${BLUE}==> END: Please power off your device, remove the SD card, and power it back on${NC}"

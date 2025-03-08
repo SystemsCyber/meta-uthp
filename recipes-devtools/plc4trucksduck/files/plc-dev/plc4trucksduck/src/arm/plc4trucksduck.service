@@ -4,7 +4,7 @@ After=network.target remoteproc.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/plc4trucksduck_host -v -l /var/log/plc4trucksduck.log
+ExecStart=/usr/bin/plc4trucksduck_host -v -l /var/log/plc4trucksduck.log # clear the log file if needed
 Restart=on-failure
 Environment=PYTHONUNBUFFERED=1
 User=root

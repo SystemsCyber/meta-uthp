@@ -4,6 +4,14 @@ DTB_SOURCE_DIR="/boot/dtb/uthp/"
 EXTLINUX_DIR="/boot/p1/extlinux/"
 EXTLINUX_CONF="/boot/p1/extlinux/extlinux.conf"
 
+# check uid
+if [ "$UID" -ne 0 ]; then
+    echo "==> Please run as root"
+    exit 1
+fi
+# let's compile the dts files with make
+make -C /boot/dts/uthp/
+
 # Check if source and destination directories exist
 if [ ! -d "$DTB_SOURCE_DIR" ]; then
     echo "Source directory $DTB_SOURCE_DIR does not exist."
@@ -15,6 +23,7 @@ if [ ! -d "$EXTLINUX_DIR" ]; then
     mkdir -p "$EXTLINUX_DIR"
 fi
 
+# TODO: make self contained dts files for each overlay
 # Copy some specific .dtbo files to source directory
 # (these are added by ti)
 cp /boot/dtb/ti/omap/BB-I2C1-MCP7940X-00A0.dtbo "$DTB_SOURCE_DIR"

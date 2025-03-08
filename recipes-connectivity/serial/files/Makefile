@@ -25,7 +25,8 @@ clean:
 # must be run as root
 install: 
 	install -d /usr/bin
+	install -m 0755 ./j1708_grimm_encoder /usr/bin
 	for executable in $(EXECUTABLES); do \
 		install -m 0755 $$executable /usr/bin; \
-		@ echo "Installed $$executable"; \
+		echo "Installed $$executable"; \
 	done

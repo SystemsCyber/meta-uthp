@@ -7,6 +7,7 @@ SRC_URI += "file://init-uthp.sh \
             file://.nanorc \
             file://emmc-flasher \
             file://timesyncd.conf \
+            file://journald.conf \
             file://J1939db.json \
             file://J1708_201609.pdf.txt \
             file://J1587_201301.pdf.txt \
@@ -70,9 +71,12 @@ do_install:append() {
     install -d ${D}/usr/bin
     install -m 0755 ${WORKDIR}/emmc-flasher ${D}/usr/bin/emmc-flasher
 
-    # TODO: need to test rtc with timesyncd
     install -d ${D}${sysconfdir}/systemd/timesyncd.conf.d
     install -m 0644 ${WORKDIR}/timesyncd.conf ${D}${sysconfdir}/systemd/timesyncd.conf.d/timesyncd-uthp.conf
+    
+    # TODO: check if this is actually added
+    install -d ${D}${sysconfdir}/systemd/journald.conf.d
+    install -m 0644 ${WORKDIR}/journald.conf ${D}${sysconfdir}/systemd/journald.conf.d/journald-uthp.conf
 }
 
 RDEPENDS:${PN} += "bash python3 python3-core python3-pyserial"

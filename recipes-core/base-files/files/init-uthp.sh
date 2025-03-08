@@ -1,5 +1,4 @@
 #!/bin/sh
-# TODO: do we need sh or bash?
 
 # ANSI Color -- use these variables to easily have different color
 #    and format output. Make sure to output the reset sequence after 

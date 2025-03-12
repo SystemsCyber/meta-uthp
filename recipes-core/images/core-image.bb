@@ -1,10 +1,10 @@
-# TODO: This should be a production ready image.
 SUMMARY = "UTHP Core Image Recipe"
 DESCRIPTION = "A core image recipe for the UTHP project"
 LICENSE = "MIT"
 
 INHERIT += "cve-check"
 
+# poky/core-image.bbclass
 inherit core-image
 
 GLIBC_GENERATE_LOCALES = "en_US.UTF-8"
@@ -12,7 +12,7 @@ IMAGE_LINGUAS = "en-us"
 
 IMAGE_INSTALL = " packagegroup-core-boot ${CORE_IMAGE_EXTRA_INSTALL}"
 
-# The rootfs size is 2.7GB which is adjusted dynamically by bitbake
+# The rootfs size is 2.8GB which is adjusted dynamically by bitbake
 IMAGE_ROOTFS_SIZE = "2797152"
 
 CORE_OS = " \
@@ -25,6 +25,7 @@ CORE_OS = " \
     locale-base-en-gb \
     uthp-serial-services \
     uthp-tcp-services \
+    uthp-tests \
  "
 
 KERNEL_EXTRA_INSTALL = " \
@@ -112,7 +113,7 @@ CAN_TOOLS = " \
     cannelloni \
     cannelloni-server \
  "
-# deleted config-pin
+
 PREFERRED_VERSION_python = "2.7"
 PYTHON_TOOLS = " \
     python \
@@ -157,6 +158,7 @@ PYTHON3_TOOLS = " \
     python3-platformdirs \
     python3-click \
     python3-rpds-py \
+    python3-pytest \
  "
 
 IMAGE_INSTALL += " \
@@ -174,13 +176,11 @@ update_sudoers(){
 }
 
 inherit extrausers
-PASS = '\$6\$kXDp5Q1Ki1mAOJ7U\$Bz7DjUHuRjnO/oPL6Xc3/TOiknek/eXiXIL8wiU00VpNJmd9dMayr6RvsY5Ip9DZ7Q9CAZEhFIKAgYRJf8ZgV0'
+# let's at least make sure the pre-production image has some security... generate a password hash for 'root' using our quick script generate-preproduction-password.sh
+HASH_PASS = "\$6\$fJxcAKMWA84wS4sT\$BF5XVhI6eyEvu7w3k8D8lPRttzMiY72qloPOolJo1pv7siU1Vsa49IqBtf6JUNvZ.Acz0WCYLLLWPFF0ehJDg/"
 EXTRA_USERS_PARAMS = " \
-    useradd -u 1000 -d /home/uthp -s /bin/bash -p '${PASS}' uthp; \
-    usermod -aG sudo uthp; \
-    passwd-expire uthp; \
     usermod -s /bin/bash root; \
-    usermod -p '${PASS}' root; \
+    usermod -p '${HASH_PASS}' root; \
     passwd-expire root; \
 	"
 

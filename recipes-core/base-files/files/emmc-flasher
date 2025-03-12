@@ -253,6 +253,9 @@ echo -e "${BLUE}==> User 'uthp' added${NC}"
 # lock root account
 echo -e "${BLUE}==> Locking root account${NC}"
 passwd -l root
+# update uthp dir
+echo -e "${BLUE}==> Updating uthp directory${NC}"
+sudo chown -R uthp:uthp /home/uthp
 # start leds
 cylon_leds & CYLON_PID=$!
 # flush cache

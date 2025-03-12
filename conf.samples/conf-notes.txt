@@ -5,6 +5,7 @@ You can now run 'bitbake <target>'
 
 Current targets are:
     core-image
+    core-image-truckduck
 
 After you have built the image, 
 you can flash the core-image-uthp.rootfs.wic.xz 

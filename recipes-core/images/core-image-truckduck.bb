@@ -1,5 +1,5 @@
-# Note: this is a devlopment image, not a production image. It is intended for development and testing purposes only.
-SUMMARY = "UTHP Core Image Recipe"
+# Note: this is a devlopment image for the truckduck project; not tested for production
+SUMMARY = "TruckDuck Compliant Recipe"
 DESCRIPTION = "A core image recipe for the UTHP project"
 LICENSE = "MIT"
 
@@ -24,9 +24,9 @@ CORE_OS = " \
     safe-shutdown \
     locale-base-en-us \
     locale-base-en-gb \
-    uthp-serial-services \
-    uthp-tcp-services \
-    uthp-tests \
+    truckduck-serial-services \
+    truckduck-tcp-services \
+    truckduck-tests \
  "
 
 KERNEL_EXTRA_INSTALL = " \
@@ -34,7 +34,7 @@ KERNEL_EXTRA_INSTALL = " \
     kernel-modules \
     linux-libc-headers-dev \
     kernel-devsrc \
-    uthp-devicetrees \
+    truckduck-devicetrees \
  "
 
 DEV_SDK_INSTALL = " \
@@ -114,7 +114,7 @@ CAN_TOOLS = " \
     cannelloni \
     cannelloni-server \
  "
-# deleted config-pin
+ 
 PREFERRED_VERSION_python = "2.7"
 PYTHON_TOOLS = " \
     python \

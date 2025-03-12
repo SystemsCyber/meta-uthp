@@ -1,10 +1,10 @@
 [Unit]
-Description=TCP Routing
+Description=TCP M2 Encoder Router
 After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/tcp-router
+ExecStart=/usr/bin/truckdevil-tcp
 Restart=on-failure
 User=root
 

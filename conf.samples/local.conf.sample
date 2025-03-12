@@ -21,7 +21,7 @@ PARALLEL_MAKE = "-j 12"
 BB_NUMBER_THREADS = "12"
 
 PACKAGE_CLASSES ?= "package_deb"
-EXTRA_IMAGE_FEATURES += " package-management"
+EXTRA_IMAGE_FEATURES += " package-management bash-completion-pkgs"
 # PACKAGE_FEED_URIS = "http://deb.debian.org/debian"
 # PACKAGE_FEED_BASE_PATHS = "bookworm"
 # PACKAGE_ARCHS = "armhf"

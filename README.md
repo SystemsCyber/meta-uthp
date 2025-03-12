@@ -1,6 +1,6 @@
-# meta-uthp Layer
+# meta-uthp layer
 
-This README file contains information on the contents of the meta-uthp layer.
+This README file contains information on the contents of the meta-uthp layer, corresponding to the [UTHP project](https://github.com/SystemsCyber/UTHP).
 
 Please see the corresponding sections below for details.
 
@@ -9,33 +9,43 @@ Please see the corresponding sections below for details.
 The meta-uthp layer depends on the following layers:
 
 - **URI**: core  
+
   **branch**: scarthgap
 
 - **URI**: meta-openembedded/meta-python 
+  
   **branch**: scarthgap
 
 - **URI**: meta-python2
+
   **branch**: master / close to scarthgap
 
 - **URI**: networking-layer (meta-openembedded/meta-networking)
+
   **branch**: scarthgap
 
 - **URI**: jupyter-layer
+
   **branch**: master / close to scarthgap
 
 - **URI**: arm-toolchain  
+
   **branch**: scarthgap
 
 - **URI**: meta-arm  
+
   **branch**: scarthgap
 
 - **URI**: meta-ti-bsp  
+
   **branch**: scarthgap
 
 - **URI**: meta-ti-extras  
+
   **branch**: scarthgap
 
 - **URI**: meta-ti-beagle  
+
   **branch**: scarthgap
 
 ## From scratch:
@@ -60,7 +70,7 @@ source oe-init-build-env
 ```
 
 Then you can build the image:
-> Note: you need to have all the standards under the same location so our recipe can pull them. Otherwise delete or modify the [base files recipe](./recipes-core/base-files/base-files_%.bbappend)
+> Note: you need to have all the standards (e.g., J1939db.json) under the same location so our recipe can pull them. Otherwise delete or modify the [base files recipe](./recipes-core/base-files/base-files_%.bbappend)
 
 
 ```shell
@@ -70,25 +80,27 @@ bitbake core-image
 ```shell
 tmux new-session -d -s core-image 'bitbake <image>'
 ```
-After the image is complete, you can flash it to your device from 'deploy-ti/images/uthp/core-image-uthp.rootfs.wic.xz' with your favorite flashing tool (tested with balenaEtcher).
+After the image is complete, you can flash it to your device from 'deploy-ti/images/uthp/core-image-uthp.rootfs.wic.xz' with your favorite flashing tool (tested with balenaEtcher). 
 
-To connect to the device, you can use Windows 10/11, or Linux with the following command:
+**If the device doesn't boot after inserting the microSD card, you will need to hold down the [s2](https://forum.beagleboard.org/t/how-does-beagleboard-determine-if-s2-is-pressed-during-boot/38587/2) button to force the bootloader to use the correct media.**
+
+After inserting the microSD card, you can connect to the device via the USB cable. The device will show up as a serial device on your computer. To connect to the device, you can use Windows 10/11, Linux, or Mac with the following command:
 ```shell
-ssh uthp@192.168.7.2
+ssh root@192.168.7.2
 ```
 or 
 ```shell
-screen /dev/ttyACM0 115200
+screen /dev/tty<port> 115200
 ```
 or 
 ```shell
-minicom -D /dev/ttyACM0
+minicom -D /dev/tty<port> -b 115200
 ```
 or
 ```
-putty.exe -serial COM8 -sercfg 115200,8,1,n,n
+putty.exe -serial COM<#> -sercfg 115200,8,1,n,n
 ```
 > Note there are 4 serial device interfaces served by the device. You can only use one of them for logging in. The other 3 are for diagnostics.
 
-Any issues can be reported to the layer maintainer as of 12/12/2024: beersc@colostate.edu
+Any issues can be reported to the layer maintainer as of 3/11/2025: beersc@colostate.edu
 ---

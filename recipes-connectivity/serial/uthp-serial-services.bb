@@ -34,8 +34,7 @@ do_install() {
 FILES:${PN} += "*"
 INSANE_SKIP = "32bit-time"
 
-# TODO: check if these were actually enabled
 inherit systemd
-SYSTEMD_SERVICE:${PN} += " truckdevil-serial.service j1708-grimm-encoder.service"
+SYSTEMD_SERVICE:${PN} += " serial-getty@ttyGS0.service"
 SYSTEMD_AUTO_ENABLE = "enable"
 RDEPENDS:${PN} += "python3-pyserial python3-core python3 bash"

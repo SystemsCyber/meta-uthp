@@ -50,7 +50,7 @@ ${greenf}
                   |                                                      |
              /    |                                                      |
             /---, |                                                      |
-       -----# ==| |                TruckHackingOS v1.0.0                 |
+       -----# ==| |                TruckHackingOS v1.0.3                 |
        | :) # ==| |                                                      |
   -----'----#   | |______________________________________________________|
   |)___()  '#   |______====____   \___________________________________|
@@ -59,7 +59,6 @@ ${greenf}
 ----'-'--------------'-'--'-'-----------------------'-'--'-'--'-'--------------
 Welcome to the Ultimate Truck Hacking Platform
 
-To find software included in this image, run 'sudo apt list', 'dpkg -l', or 'pip3 list'
 ${reset}
 
 EOF

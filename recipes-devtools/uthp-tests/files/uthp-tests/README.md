@@ -4,7 +4,7 @@ The UTHP team put together a set of pytests to test the Yocto build of the UTHP 
 
 ## Prerequisites
 
-### 1. Connect the UTHP to the network and power it on
+### 1. Connect the UTHP to the network and power it on with the SD card inserted. You may need to hold down the s2 button if another image is already flashed to the eMMC.
 
 ### 2. SSH into the UTHP
 
@@ -16,7 +16,7 @@ ssh root@192.168.7.2
 ### 3. Generate the 'Production-Ready' image (i.e. the image that will be flashed to the eMMC)
 
 ```bash
-sudo emmc-flasher
+emmc-flasher
 ```
 
 Now you are ready to take the tests for a spin! Remove the SD card from the UTHP and power cycle the device.
@@ -32,7 +32,10 @@ Start by plugging in the two battery chargers. Turn on both red safety switches 
 ```bash
 ssh uthp@192.168.7.2
 ```
-> Password: 'UTHP-R1-XXXX' (where 'XXXX' is the last 4 digits of the UTHP serial number). This will be changed after tests are run.
+> Password: 'UTHP-R1-XXXX' (where 'XXXX' is the last 4 digits of the UTHP serial number). 
+
+*THIS PASSWORD IS TEMPORARY AND SHOULD BE
+CHANGED IMMEDIATELY AFTER LOGGING IN.*
 
 ### 3. Run the tests
 
@@ -55,6 +58,17 @@ and the PLC tests:
 ```bash
 make plc-test
 ```
+and the remote tests:
+
+```bash
+make remote-test
+```
+or if make is not installed on your system, you can simply run:
+
+TODO:
+```bash
+pytest ./remote
+```
 And after we have achieved success, we can submit the image as production-ready:
 
 1. Save the test results:
@@ -65,6 +79,9 @@ And after we have achieved success, we can submit the image as production-ready:
 scp -r uthp@192.168.7.2:/home/uthp/uthp-tests/logs <destination>
 ```
 
+and then copy the remote test results from your local machine as well.
+
+> WARNING: The following command will delete the uthp-tests dir and set the password to expire for the uthp user:
 ```bash
 make production-ready
 ```

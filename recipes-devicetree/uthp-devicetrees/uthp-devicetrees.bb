@@ -5,6 +5,7 @@ SRC_URI += " file://BB-UTHP-DCAN.dts \
             file://BB-UART5-00A0.dts \
             file://update-overlays \
             file://Makefile \
+            file://README.md \
             "
 
 LICENSE = "CLOSED"
@@ -15,6 +16,8 @@ do_install() {
     install -m 0644 ${WORKDIR}/*.dts ${D}/boot/dts/uthp
     # install makefile
     install -m 0644 ${WORKDIR}/Makefile ${D}/boot/dts/uthp
+    # install README
+    install -m 0644 ${WORKDIR}/README.md ${D}/boot/dts/uthp
 
     install -d ${D}/usr/bin
     install -m 0755 ${WORKDIR}/update-overlays ${D}/usr/bin

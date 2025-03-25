@@ -73,7 +73,7 @@ And after we have achieved success, we can submit the image as production-ready:
 
 1. Save the test results:
 
-> Note: Test results should be saved to the UTHP github repo: https://github.com/SystemsCyber/UTHP/tree/main/Testing/Software/assets/logs
+> Note: Test results should be saved to the UTHP github repo: https://github.com/SystemsCyber/UTHP/tree/main/Testing/Software/assets/logs. The logs should be saved under a directory with the serial number of the UTHP. An example of the directory structure is shown in the [logs](https://github.com/SystemsCyber/UTHP/tree/main/Testing/Software/assets/logs) directory of the UTHP github repo.
 
 ```bash
 scp -r uthp@192.168.7.2:/home/uthp/uthp-tests/logs <destination>

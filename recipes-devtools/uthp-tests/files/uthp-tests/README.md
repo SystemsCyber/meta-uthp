@@ -65,6 +65,10 @@ And after we have achieved success, we can submit the image as production-ready:
 scp -r uthp@192.168.7.2:/home/uthp/uthp-tests/logs <destination>
 ```
 
+and then copy the remote test results from your local machine as well. Save these results to the UTHP github repo, with the coreresponding UTHP serial number. An example of where and how to save the results can be found [here](https://github.com/SystemsCyber/UTHP/tree/main/Testing/Software/assets/logs).
+
+*Note: the following destroys all results on the UTHP, so make sure to save them first!*
+
 ```bash
 make production-ready
 ```

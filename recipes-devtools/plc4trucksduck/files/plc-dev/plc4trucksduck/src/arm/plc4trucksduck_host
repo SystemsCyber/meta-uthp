@@ -1,31 +1,35 @@
 #!/usr/bin/env python3
-# PLC4TRUCKSDuck (c) 2024 National Motor Freight Traffic Association and Colorado State University
+"""
+Simple PRU python driver developed for the NMFTA by CSU for PLC communications
+"""
 
 import os
-import select
-import signal
-import socket
 import sys
 import time
+import signal
+import socket
+import select
 import logging
 import threading
 import argparse
 import fcntl
 import errno
+import psutil
 
-RPMSG_DEV = "/dev/rpmsg_pru30"  # RPMsg device file
-PAYLOAD_LEN = 255               # Must match the same in the PRU 1 firmware
-PRU_FW_PATH = "/lib/firmware/am335x-pru0-fw"  # Path to PRU 1 firmware (remoteproc1 for pru0)
-REMOTE_PROC_PATH = "/sys/class/remoteproc/remoteproc1"  # Path to remoteproc interface for PRU 1
+# constants for PRU0
+RPMSG_DEV = "/dev/rpmsg_pru30"                 
+PAYLOAD_LEN = 255                             
+PRU_FW_PATH = "/lib/firmware/am335x-pru0-fw"    
+REMOTE_PROC_PATH = "/sys/class/remoteproc/remoteproc1"
 
-UDP_PORTS = (6969, 6970)
+SERVER_PORT = 6969  # UDP port to receive data (from network)
+CLIENT_PORT = 6970  # UDP port to send data (to clients)
+
 exit_event = threading.Event()
 
-
 def signal_handler(sig, frame):
-    logging.info("Signal received (SIGINT/SIGTERM), exiting...")
+    logging.info("Signal received, exiting...")
     exit_event.set()
-
 
 def stop_pru():
     state_path = os.path.join(REMOTE_PROC_PATH, "state")
@@ -35,190 +39,214 @@ def stop_pru():
         if state != "offline":
             with open(state_path, 'w') as f:
                 f.write("stop\n")
-                f.flush()
+        logging.info("PRU stopped.")
     except IOError as e:
         logging.error("Error stopping PRU: %s", e)
         sys.exit(1)
-
 
 def start_pru():
     state_path = os.path.join(REMOTE_PROC_PATH, "state")
     try:
         with open(state_path, 'w') as f:
             f.write("start\n")
+        logging.info("PRU started.")
     except IOError as e:
         logging.error("Error starting PRU: %s", e)
         sys.exit(1)
-
 
 def set_firmware():
     firmware_path = os.path.join(REMOTE_PROC_PATH, "firmware")
     try:
         with open(firmware_path, 'w') as f:
             f.write(os.path.basename(PRU_FW_PATH) + '\n')
+        logging.info("Firmware set to %s", os.path.basename(PRU_FW_PATH))
     except IOError as e:
         logging.error("Error setting PRU firmware: %s", e)
         sys.exit(1)
 
+def get_interface_ips():
+    """
+    Enumerate all IPv4 interfaces using psutil.
+    Returns a dictionary {interface_name: ip_address}.
+    """
+    interface_ips = {}
+    for iface, addrs in psutil.net_if_addrs().items():
+        for addr in addrs:
+            if addr.family == socket.AF_INET:
+                interface_ips[iface] = addr.address
+    return interface_ips
 
-def read_from_pru(rpmsg_fd, sock):
+def read_from_pru(rpmsg_fd, send_sockets):
+    """
+    Read data from the RPMsg device and send it on each interface's send socket.
+    """
     while not exit_event.is_set():
         rlist, _, _ = select.select([rpmsg_fd], [], [], 1)
         if rlist:
             try:
                 data = os.read(rpmsg_fd, PAYLOAD_LEN)
                 if data:
-                    # Send data via UDP
-                    sock.sendto(data, ('0.0.0.0', UDP_PORTS[1]))
+                    for iface, sock in send_sockets.items():
+                        local_ip = sock.getsockname()[0]
+                        if local_ip == "127.0.0.1":
+                            dest = ("127.0.0.1", CLIENT_PORT)
+                        else:
+                            dest = ("255.255.255.255", CLIENT_PORT)
+                        sock.sendto(data, dest)
+                        logging.info("Sent from interface %s (%s) to %s:%d",
+                                     iface, local_ip, dest[0], dest[1])
                     logging.info("Received from PRU: %s", data.hex())
                     logging.info("Timestamp: %s", time.time())
             except OSError as e:
                 logging.error("Error reading from RPMsg: %s", e)
                 break
 
-
-def write_to_pru(rpmsg_fd, sock):
-    sock_fd = sock.fileno()
+def write_to_pru(rpmsg_fd, recv_sockets):
+    """
+    Monitor each interface's receive socket (bound to port 6969) for incoming UDP data.
+    """
+    sock_fds = [sock.fileno() for sock in recv_sockets.values()]
     while not exit_event.is_set():
-        rlist, _, _ = select.select([sock_fd], [], [], 1)
+        rlist, _, _ = select.select(sock_fds, [], [], 1)
         if rlist:
-            try:
-                frame = sock.recv(PAYLOAD_LEN)
-                logging.info("Received from UDP: %s", frame.hex())
-                os.write(rpmsg_fd, frame[:PAYLOAD_LEN])
-                logging.info("Sent to PRU: %s", frame.hex())
-                logging.info("Timestamp: %s", time.time())
-            except OSError as e:
-                logging.error("Error writing to RPMsg: %s", e)
-                break
+            for fd in rlist:
+                sock = next((s for s in recv_sockets.values() if s.fileno() == fd), None)
+                if sock:
+                    try:
+                        frame, addr = sock.recvfrom(PAYLOAD_LEN)
+                        logging.info("Received UDP from %s on %s: %s",
+                                     addr, sock.getsockname()[0], frame.hex())
+                        os.write(rpmsg_fd, frame[:PAYLOAD_LEN])
+                        logging.info("Sent to PRU: %s", frame.hex())
+                        logging.info("Timestamp: %s", time.time())
+                    except OSError as e:
+                        logging.error("Error writing to RPMsg: %s", e)
+                        break
 
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="PLC4TRUCKSDuck communication with PRU 1 firmware."
-    )
-    parser.add_argument(
-        "-v", "--verbose", action="store_true", help="Enable verbose (INFO-level) logging"
-    )
-    parser.add_argument(
-        "-l", "--logfile", type=str, default=None, help="Optional file to output logging to"
-    )
-    args = parser.parse_args()
-    log_kwargs = {
-        "format": "%(asctime)s - %(levelname)s - %(message)s",
-        "filename": args.logfile  # if None, logs will go to stderr.
-    }
-    if args.verbose:
-        log_kwargs["level"] = logging.INFO
-    else:
-        log_kwargs["level"] = logging.WARNING
-
-    logging.basicConfig(**log_kwargs)
-
-    logging.info("Starting main program for PRU 1...")
-
-    # register a signal handler for SIGINT that sets an event to exit the threads
-    signal.signal(signal.SIGINT, signal_handler)
-    signal.signal(signal.SIGTERM, signal_handler)
-    logging.info("Signal handler registered.")
-
-    sock = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
-    logging.info("UDP socket created.")
-
-    try:
-        # udp port and ip binding (listens on all interfaces)
-        # for the UTHP this is 192.168.7.2 on the USB interface
-        sock.bind(('0.0.0.0', UDP_PORTS[0]))
-        sock.setblocking(False)
-        logging.info("Socket bound to UDP port %s.", UDP_PORTS[0])
-    except Exception as e:
-        logging.error("Socket error: %s", e)
-        sys.exit(-1)
-
-    try:
-        logging.info("Stopping PRU...")
-        stop_pru()  # always stop before loading new firmware
-        logging.info("Setting PRU firmware...")
-        set_firmware()
-        logging.info("Starting PRU...")
-        start_pru()
-    except Exception as e:
-        logging.error("PRU error: %s", e)
-        sys.exit(-1)
-
-    time.sleep(1)  # Give time for RPMsg device creation
-    logging.info("Waited 1 second for RPMsg device creation.")
-
-    # here we open the RPMsg file descriptor in read/binary mode (rb+) with no buffering (real-time)
-    try:
-        rpmsg = open(RPMSG_DEV, 'rb+', buffering=0) 
-        logging.info("RPMsg device %s opened.", RPMSG_DEV)
-    except Exception as e:
-        logging.error("Error opening RPMsg device: %s", e)
-        sock.close()
-        sys.exit(1)
-
-    # here's the file descriptor for the RPMsg device
-    rpmsg_fd = rpmsg.fileno()
-
-    # set rpmsg_fd to non-blocking mode
-    try:
-        flags = fcntl.fcntl(rpmsg_fd, fcntl.F_GETFL)
-        fcntl.fcntl(rpmsg_fd, fcntl.F_SETFL, flags | os.O_NONBLOCK)
-        logging.info("RPMsg file descriptor set to non-blocking mode.")
-    except Exception as e:
-        logging.error("Error setting non-blocking mode for RPMsg fd: %s", e)
-        sys.exit(1)
-
-    # clear any initial garbage data by writing a dummy frame. this may not even be needed.
-    try:
-        os.write(rpmsg_fd, b'\x00')
-        logging.info("Dummy frame written to RPMsg device.")
-    except OSError:
-        logging.error("Error writing dummy frame to RPMsg device.")
-
-    # flush the RPMsg buffer using non-blocking reads until the buffer appears idle.
+def flush_rpmsg(rpmsg_fd):
+    """
+    Flush any residual data from the RPMsg device.
+    """
     logging.info("Flushing RPMsg buffer...")
     flush_start = time.time()
-    consecutive_empty = 0
-    # basically flushing the file descriptor buffer because the PRU needs to SYNC with the host
-    while time.time() - flush_start < 4 or consecutive_empty < 3:
+    is_empty = 0
+    while time.time() - flush_start < 4 or is_empty < 3:
         try:
             data = os.read(rpmsg_fd, PAYLOAD_LEN)
             if data:
                 logging.info("Flushed data: %s", data.hex())
-                consecutive_empty = 0
+                is_empty = 0
             else:
-                consecutive_empty += 1
+                is_empty += 1
                 time.sleep(0.1)
         except OSError as e:
             if e.errno in (errno.EAGAIN, errno.EWOULDBLOCK):
-                consecutive_empty += 1
+                is_empty += 1
                 time.sleep(0.1)
             else:
-                logging.error("Error reading during flush: %s", e)
+                logging.error("Error during flush: %s", e)
                 break
     logging.info("RPMsg buffer flushed.")
 
-    # create and start threads for reading from and writing to the PRU
-    read_thread = threading.Thread(target=read_from_pru, args=(rpmsg_fd, sock))
-    write_thread = threading.Thread(target=write_to_pru, args=(rpmsg_fd, sock))
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Simplified PRU1 communication with per-interface UDP sockets."
+    )
+    parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose logging")
+    parser.add_argument("-l", "--logfile", type=str, default=None, help="Optional log file path")
+    args = parser.parse_args()
 
+    logging.basicConfig(
+        format="%(asctime)s - %(levelname)s - %(message)s",
+        filename=args.logfile,
+        level=logging.INFO if args.verbose else logging.WARNING
+    )
+    logging.info("Starting PRU1 communication...")
+
+    # Register signal handlers
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+
+    interfaces = get_interface_ips()
+    logging.info("Detected interfaces: %s", interfaces)
+
+    #### Interface Enumeration ####
+    recv_sockets = {}
+    send_sockets = {}
+    for iface, ip in interfaces.items():
+        # create a receive socket bound to the interface's IP on SERVER_PORT (6969)
+        try:
+            r_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            r_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            r_sock.bind((ip, SERVER_PORT))
+            r_sock.setblocking(False)
+            recv_sockets[iface] = r_sock
+            logging.info("Receive socket bound on %s (%s) to port %d", iface, ip, SERVER_PORT)
+        except OSError as e:
+            logging.error("Error binding receive socket on %s (%s): %s", iface, ip, e)
+
+        # create a send socket bound to the interface's IP (using an ephemeral port)
+        try:
+            s_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            if ip != "127.0.0.1":
+                s_sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+            s_sock.bind((ip, 0))
+            s_sock.setblocking(False)
+            send_sockets[iface] = s_sock
+            logging.info("Send socket bound on %s (%s) to ephemeral port %d",
+                         iface, ip, s_sock.getsockname()[1])
+        except OSError as e:
+            logging.error("Error binding send socket on %s (%s): %s", iface, ip, e)
+
+    #### PRU firmware and state. ####
+    stop_pru()
+    set_firmware()
+    start_pru()
+
+    time.sleep(1)  # allow time for RPMsg device creation.
+
+    try:
+        rpmsg = open(RPMSG_DEV, 'rb+', buffering=0)
+        logging.info("RPMsg device opened: %s", RPMSG_DEV)
+    except Exception as e:
+        logging.error("Error opening RPMsg device: %s", e)
+        for s in recv_sockets.values():
+            s.close()
+        for s in send_sockets.values():
+            s.close()
+        sys.exit(1)
+
+    rpmsg_fd = rpmsg.fileno()
+    # Set the RPMsg file descriptor to non-blocking mode.
+    flags = fcntl.fcntl(rpmsg_fd, fcntl.F_GETFL)
+    fcntl.fcntl(rpmsg_fd, fcntl.F_SETFL, flags | os.O_NONBLOCK)
+    logging.info("RPMsg fd set to non-blocking mode.")
+
+    try:
+        os.write(rpmsg_fd, b'\x00')
+        logging.info("Dummy frame written to RPMsg.")
+    except OSError:
+        logging.error("Error writing dummy frame to RPMsg.")
+
+    flush_rpmsg(rpmsg_fd)
+
+    # Create threads for bidirectional communication.
+    read_thread = threading.Thread(target=read_from_pru, args=(rpmsg_fd, send_sockets))
+    write_thread = threading.Thread(target=write_to_pru, args=(rpmsg_fd, recv_sockets))
     read_thread.start()
     logging.info("Read thread started.")
     write_thread.start()
     logging.info("Write thread started.")
 
-    # wait for both threads to complete (until SIGINT is received)
     read_thread.join()
     logging.info("Read thread joined.")
     write_thread.join()
     logging.info("Write thread joined.")
 
-    # clean up after threads finish
     rpmsg.close()
-    logging.info("RPMsg device closed.")
-    sock.close()
-    logging.info("Socket closed.")
+    for sock in recv_sockets.values():
+        sock.close()
+    for sock in send_sockets.values():
+        sock.close()
     stop_pru()
-    logging.info("PRU stopped.")
+    logging.info("PRU stopped. Exiting.")

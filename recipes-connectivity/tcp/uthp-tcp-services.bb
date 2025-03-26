@@ -17,5 +17,5 @@ FILES:${PN} += "${sysconfdir}/systemd/system/truckdevil-tcp.service \
                "
 
 inherit systemd
-SYSTEMD_SERVICE:${PN} += " tcp-router.service"
+SYSTEMD_SERVICE:${PN} += " truckdevil-tcp.service"
 RDEPENDS:${PN} += "python3-pyserial python3-core python3"

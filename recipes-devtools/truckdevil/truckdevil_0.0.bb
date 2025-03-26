@@ -1,3 +1,4 @@
+# TODO: update this with TCP enabled truckdevil
 DESCRIPTION = "Useful in interacting with trucks that use J1939"
 SECTION = "devel/python"
 LICENSE = "MIT"

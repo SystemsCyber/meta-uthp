@@ -21,7 +21,7 @@ def main():
 
     try:
         print("\nRunning SSH test...\n")
-        result = subprocess.run(["pytest", "-s", "test_ssh.py"], check=True)
+        result = subprocess.run(["pytest", "."], check=True)
     except subprocess.CalledProcessError:
         print("Test failed.")
     finally:

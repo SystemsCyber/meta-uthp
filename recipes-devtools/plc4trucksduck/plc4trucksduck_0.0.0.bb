@@ -36,7 +36,5 @@ FILES:${PN} += "${TARGET_DIR} \
                 /usr/lib/*"
 
 # only one can be enabled at a time with PRU resources available
-inherit systemd
-SYSTEMD_SERVICE:${PN} += " j17084truckduck.service plc4trucksduck.service"
 RDEPENDS:${PN} += "python3-core python3 python bash"
 INSANE_SKIP:${PN} += "arch"

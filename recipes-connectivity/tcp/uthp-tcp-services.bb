@@ -12,10 +12,6 @@ do_install() {
     install -m 0755 ${WORKDIR}/truckdevil-tcp ${D}/usr/bin/
 }
 
-FILES:${PN} += "${sysconfdir}/systemd/system/truckdevil-tcp.service \
-                /usr/bin/truckdevil-tcp \
-               "
+FILES:${PN} += "*"
 
-inherit systemd
-SYSTEMD_SERVICE:${PN} += " truckdevil-tcp.service"
 RDEPENDS:${PN} += "python3-pyserial python3-core python3"

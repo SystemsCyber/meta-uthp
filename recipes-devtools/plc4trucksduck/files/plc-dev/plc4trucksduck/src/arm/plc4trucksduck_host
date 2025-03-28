@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Simple PRU python driver developed for the NMFTA by CSU for PLC communications
+Simple PRU python driver developed for the NMFTA for PLC communications
 """
 
 import os

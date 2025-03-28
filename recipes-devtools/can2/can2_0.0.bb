@@ -2,7 +2,7 @@ DESCRIPTION = "Python module for CAN bus hacking utilities, installs can2 into l
 HOMEPAGE = "https://github.com/kentindell/canhack"
 SECTION = "devel/python"
 LICENSE = "MIT"
-LIC_FILES_CHKSUM = "file://${THISDIR}/LICENSE;md5=9cbb8e86b6798efc990e6ac9a33a8b14"
+LIC_FILES_CHKSUM = "file://${WORKDIR}/git-src/LICENSE;md5=8310311119912ce8b370b7ad60cc450c"
 
 SRC_URI = "git://github.com/kentindell/canhack.git;protocol=https;branch=master;destsuffix=git-src"
 SRCREV = "e0c3a3da14969a8a7a3c8da817aaf66b3bfb7c04"

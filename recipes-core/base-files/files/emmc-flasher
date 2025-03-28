@@ -238,6 +238,9 @@ sudo update-time
 # TODO: install this via a recipe
 echo -e "${BLUE}==> Installing sigrok firmware${NC}"
 sudo apt install sigrok-firmware-fx2lafw 
+# update the yocto can-utils until we figure out what's wrong with it
+sudo apt remove can-utils -y
+sudo apt install can-utils -y
 # add user
 echo -e "${BLUE}==> Generating Post-Production Image Data${NC}"
 rename_host

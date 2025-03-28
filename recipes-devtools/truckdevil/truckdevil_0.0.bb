@@ -1,12 +1,11 @@
 # TODO: update this with TCP enabled truckdevil
 DESCRIPTION = "Useful in interacting with trucks that use J1939"
 SECTION = "devel/python"
-LICENSE = "MIT"
-LIC_FILES_CHKSUM = "file://${THISDIR}/LICENSE;md5=9cbb8e86b6798efc990e6ac9a33a8b14"
+LICENSE = "GPL-3.0"
+LIC_FILES_CHKSUM = "file://${WORKDIR}/git/LICENSE.md;md5=1ebbd3e34237af26da5dc08a4e440464"
 
-# Specify the source file location
-SRC_URI = "git://github.com/LittleBlondeDevil/TruckDevil.git;protocol=https;rev=c3485b3cedfe458fdb22c58334a48b863d889d07;branch=master"
-SRC_URI[sha256sum] = "7c72341c6e872d9b9e10a681d77a407e8e2cf4e1b88a315e24bd82a938496ad2"
+# using the TCP version of TruckDevil
+SRC_URI = "git://github.com/Spenc3rB/TruckDevil.git;protocol=https;rev=95f4aadbe394bbac62d1a5009c97a119768e5c7f;branch=master"
 
 S = "${WORKDIR}/git"
 SRC_URI += "file://truckdevil"

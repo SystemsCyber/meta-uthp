@@ -1,5 +1,5 @@
 DESCRIPTION = "Systemd Serial Forwarding Services for the UTHP"
-LICENSE = "CLOSED"
+LICENSE = "MIT"
 
 SRC_URI = "file://j1708_grimm_encoder \
            file://j1708-grimm-encoder.service \

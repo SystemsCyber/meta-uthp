@@ -1,5 +1,5 @@
 DESCRIPTION = "Systemd networkd DHCP to set static IP for usb0"
-LICENSE = "CLOSED"
+LICENSE = "MIT"
 
 SRC_URI = "file://usb0.network"
 

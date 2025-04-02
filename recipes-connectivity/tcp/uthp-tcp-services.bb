@@ -1,5 +1,5 @@
 DESCRIPTION = "Systemd TCP Forwarding Services for the UTHP"
-LICENSE = "CLOSED"
+LICENSE = "MIT"
 
 SRC_URI = "file://truckdevil-tcp.service \
            file://truckdevil-tcp \

@@ -1,7 +1,7 @@
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 DESCRIPTION = "Cannelloni Server Service for UTHP"
 SUMMARY = "Must be configured with /opt/uthp/scripts/cannelloni-server/cannelloni-server.conf"
-LICENSE = "CLOSED"
+LICENSE = "MIT"
 
 SRC_URI = "file://start.sh \
            file://cannelloni-server.conf \

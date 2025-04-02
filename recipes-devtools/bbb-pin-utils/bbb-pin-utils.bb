@@ -1,6 +1,6 @@
 DESCRIPTION = "BeagleBone Black pin utility"
 HOMEPAGE = "https://github.com/mvduin/bbb-pin-utils"
-LICENSE = "CLOSED"
+LICENSE = "MIT"
 
 SRC_URI = "git://github.com/mvduin/bbb-pin-utils.git;protocol=https;branch=master"
 SRCREV = "${AUTOREV}"

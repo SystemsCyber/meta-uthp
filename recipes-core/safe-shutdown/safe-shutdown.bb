@@ -1,7 +1,7 @@
 SUMMARY = "Safe Shutdown Recipe"
 DESCRIPTION = "Recipe required to safely shutdown the BeagleBone Black in case of power loss"
 
-LICENSE = "CLOSED"
+LICENSE = "MIT"
 
 SRC_URI = "file://safe-shutdown.service \
            file://safe-shutdown.sh"

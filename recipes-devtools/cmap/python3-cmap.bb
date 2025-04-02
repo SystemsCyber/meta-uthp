@@ -1,6 +1,6 @@
 SUMMARY = "CMAP: Can Bus Mapper"
 DESCRIPTION = "cmap - CAN bus map visualization tool"
-LICENSE = "CLOSED"
+LICENSE = "MIT"
 
 SRC_URI = "git://github.com/CanBusHack/cmap.git;branch=master;protocol=https"
 SRCREV = "cb3cf1d29e1d99fb9f4fa863f7246c0df4d9c920"

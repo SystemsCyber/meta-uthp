@@ -1,5 +1,5 @@
 DESCRIPTION = "PLC4TRUCKSDUCK installation for the UTHP"
-LICENSE = "CLOSED"
+LICENSE = "MIT"
 
 SRC_URI += " file://plc-dev"
 

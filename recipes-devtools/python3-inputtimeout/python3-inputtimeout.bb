@@ -1,6 +1,6 @@
 SUMMARY = "A Python library to input with a timeout"
 HOMEPAGE = "https://github.com/johejo/inputimeout"
-LICENSE = "CLOSED"
+LICENSE = "MIT"
 SRC_URI = "git://github.com/johejo/inputimeout.git;branch=master;rev=v1.0.4;protocol=https"
 
 S = "${WORKDIR}/git"

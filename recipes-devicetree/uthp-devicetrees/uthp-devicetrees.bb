@@ -8,7 +8,7 @@ SRC_URI += " file://BB-UTHP-DCAN.dts \
             file://README.md \
             "
 
-LICENSE = "CLOSED"
+LICENSE = "MIT"
 ### REMEMBER TO dtc -O dtb -o <something>.dtbo -b 0 -@ <something>.dts ###
 do_install() {
     install -d ${D}/boot/dtb/uthp

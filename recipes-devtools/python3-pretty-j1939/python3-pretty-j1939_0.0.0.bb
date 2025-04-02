@@ -1,6 +1,6 @@
 DESCRIPTION = "python libs and scripts for pretty-printing J1939 logs"
 SECTION = "devel/python"
-LICENSE = "CLOSED"
+LICENSE = "MIT"
 
 # Specify the source file location
 SRC_URI = "git://github.com/nmfta-repo/pretty_j1939.git;protocol=https;rev=199431af9e837f299b171c5a71e3d051ad811e1b;branch=master"

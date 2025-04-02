@@ -1,6 +1,6 @@
 SUMMARY = "UTHP Tests"
 DESCRIPTION = "This recipe provides the UTHP tests."
-LICENSE = "CLOSED"
+LICENSE = "MIT"
 
 SRC_URI = "file://uthp-tests"
 

@@ -1,6 +1,6 @@
 DESCRIPTION = "This is a tool for getting detailed decodings of J1587/J1708 (and J2497) messages using the J1587 and J1708 specification PDFs as a reference"
 SECTION = "devel/python"
-LICENSE = "CLOSED"
+LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://${THISDIR}/LICENSE;md5=9cbb8e86b6798efc990e6ac9a33a8b14"
 
 # Specify the source file location

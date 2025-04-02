@@ -1,6 +1,6 @@
 DESCRIPTION = "Python module for creation and analysis of binary data"
 SECTION = "devel/python"
-LICENSE = "CLOSED"
+LICENSE = "MIT"
 
 SRC_URI[sha256sum] = "a5848a3f63111785224dca8bb4c0a75b62ecdef56a042c8d6be74b16f7e860e7"
 

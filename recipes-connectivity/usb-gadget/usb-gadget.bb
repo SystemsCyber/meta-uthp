@@ -1,5 +1,5 @@
 DESCRIPTION = "USB Gadget Setup for BeagleBone Black"
-LICENSE = "CLOSED"
+LICENSE = "MIT"
 FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
 SRC_URI += " file://bb-usb-gadgets.service \
             file://bb-start-usb-gadgets \

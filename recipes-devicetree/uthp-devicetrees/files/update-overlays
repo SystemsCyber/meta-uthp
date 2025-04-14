@@ -1,0 +1,60 @@
+#!/bin/bash
+# Define source and destination directories
+DTB_SOURCE_DIR="/boot/dtb/uthp/"
+EXTLINUX_DIR="/boot/p1/extlinux/"
+EXTLINUX_CONF="/boot/p1/extlinux/extlinux.conf"
+
+# check uid
+if [ "$UID" -ne 0 ]; then
+    echo "==> Please run as root"
+    exit 1
+fi
+# clean first
+make -C /boot/dts/uthp/ clean
+# then compile
+make -C /boot/dts/uthp/
+
+# Check if source and destination directories exist
+if [ ! -d "$DTB_SOURCE_DIR" ]; then
+    echo "Source directory $DTB_SOURCE_DIR does not exist."
+    exit 1
+fi
+
+if [ ! -d "$EXTLINUX_DIR" ]; then
+    echo "Destination directory $EXTLINUX_DIR does not exist."
+    mkdir -p "$EXTLINUX_DIR"
+fi
+
+# provided by ti
+cp /boot/dtb/ti/omap/BB-I2C1-MCP7940X-00A0.dtbo "$DTB_SOURCE_DIR"
+
+# Copy all *.dtbo files from source to destination directory
+# (these are added by us)
+# Check if there is space on the partition before copying
+if cp "$DTB_SOURCE_DIR"*.dtbo "$EXTLINUX_DIR"; then
+    echo "==> Copied all .dtbo files from $DTB_SOURCE_DIR to $EXTLINUX_DIR"
+else
+    echo "==> Not enough space on the partition to copy all .dtbo files. Please free up some space."
+fi
+
+# Backup the extlinux.conf file
+cp "$EXTLINUX_CONF" "${EXTLINUX_CONF}.backup.$(date +%Y%m%d%H%M%S)"
+
+# Prepare the FDTOVERLAYS line
+FDTOVERLAYS="FDTOVERLAYS"
+for dtbo_file in "$EXTLINUX_DIR"*.dtbo; do
+    dtbo_filename=$(basename "$dtbo_file")
+    FDTOVERLAYS="${FDTOVERLAYS} ./${dtbo_filename}"
+done
+
+# Insert the FDTOVERLAYS line after the FDTDIR line and before the APPEND line
+# First, remove any existing FDTOVERLAYS line
+sed -i '/FDTOVERLAYS/d' "$EXTLINUX_CONF"
+
+# Insert the new FDTOVERLAYS line
+sed -i "/FDTDIR ../a \\\t${FDTOVERLAYS}" "$EXTLINUX_CONF"
+
+echo "==> Added .dtbo files to $EXTLINUX_CONF:"
+cat "$EXTLINUX_CONF"
+
+echo -e "\n==> Please reboot to apply the changes..."

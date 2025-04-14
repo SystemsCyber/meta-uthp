@@ -1,0 +1,22 @@
+DESCRIPTION = "The package provides SAE J1939 support for Python developers"
+SECTION = "devel/python"
+LICENSE = "MIT"
+
+SRC_URI = "git://github.com/TruckHacking/py-hv-networks.git;protocol=https;rev=559d9e1dda2d21bfd7dec611f1e47a84e2fb449d;branch=master"
+
+S = "${WORKDIR}/git"
+inherit setuptools3
+
+# TODO: test this
+do_install(){
+    # install scripts
+    install -d ${D}${bindir}
+    install -m 0755 ${S}/j1708dump.py ${D}${bindir}/j1708dump
+    install -m 0755 ${S}/j1708send.py ${D}${bindir}/j1708send
+
+    # install everything just in case
+    install -d ${D}${PYTHON_SITEPACKAGES_DIR}/hv_networks
+    install -m 0644 ${S}/hv_networks/* ${D}/${PYTHON_SITEPACKAGES_DIR}/hv_networks/
+}
+
+FILES:${PN} += "*"

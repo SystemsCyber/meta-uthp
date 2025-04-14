@@ -1,0 +1,12 @@
+[Unit]
+Description=J1708 Grimm Encoder Service
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/j1708_grimm_encoder 127.0.0.2 # change the loopback address if needed
+Restart=always
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target

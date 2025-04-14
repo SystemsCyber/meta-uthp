@@ -1,0 +1,49 @@
+#!/bin/bash
+
+LED_PATH="/sys/class/leds/uthp:led1"
+
+# === Input arguments ===
+can_num="$1"
+direction="$2"
+
+# === Input validation ===
+if ! [[ "$can_num" =~ ^[0-3]$ ]]; then
+  echo "Error: Invalid CAN channel. Must be a number between 0 and 3."
+  echo "Usage: $0 <can_channel 0-3> <rx|tx|both>"
+  exit 1
+fi
+
+if ! [[ "$direction" =~ ^(rx|tx|both)$ ]]; then
+  echo "Error: Invalid direction. Must be 'rx', 'tx', or 'both'."
+  echo "Usage: $0 <can_channel 0-3> <rx|tx|both>"
+  exit 1
+fi
+
+can_iface="can$can_num"
+
+# === Configure LED ===
+echo "Setting LED trigger to netdev..."
+echo netdev | sudo tee "$LED_PATH/trigger" > /dev/null
+
+echo "Assigning CAN device: $can_iface"
+echo "$can_iface" | sudo tee "$LED_PATH/device_name" > /dev/null
+
+case "$direction" in
+  rx)
+    echo "Enabling RX only..."
+    echo 1 | sudo tee "$LED_PATH/rx" > /dev/null
+    echo 0 | sudo tee "$LED_PATH/tx" > /dev/null
+    ;;
+  tx)
+    echo "Enabling TX only..."
+    echo 0 | sudo tee "$LED_PATH/rx" > /dev/null
+    echo 1 | sudo tee "$LED_PATH/tx" > /dev/null
+    ;;
+  both)
+    echo "Enabling both RX and TX..."
+    echo 1 | sudo tee "$LED_PATH/rx" > /dev/null
+    echo 1 | sudo tee "$LED_PATH/tx" > /dev/null
+    ;;
+esac
+
+echo "LED configuration complete for $can_iface ($direction)."

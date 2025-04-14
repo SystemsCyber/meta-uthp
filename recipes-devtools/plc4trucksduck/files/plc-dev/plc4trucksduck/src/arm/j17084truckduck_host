@@ -1,0 +1,297 @@
+#!/usr/bin/env python3
+# PLC4TRUCKSDuck (c) 2025 National Motor Freight Traffic Association
+#  
+#   Permission is hereby granted, free of charge, to any person obtaining a copy
+#   of this software and associated documentation files (the "Software"), to deal
+#   in the Software without restriction, including without limitation the rights
+#   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#   copies of the Software, and to permit persons to whom the Software is
+#   furnished to do so, subject to the following conditions:
+#  
+#   The above copyright notice and this permission notice shall be included in all
+#   copies or substantial portions of the Software.
+#  
+#   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+#   SOFTWARE.
+
+"""
+Simple PRU python driver developed for the NMFTA for J1708 communications
+"""
+
+import os
+import sys
+import time
+import logging
+import threading
+import argparse
+import select
+import fcntl
+import errno
+import socket
+import signal
+import psutil
+
+# constants for PRU1
+RPMSG_DEV = "/dev/rpmsg_pru31"                 # RPMsg device file
+PAYLOAD_LEN = 255                              # Must match PRU firmware settings
+PRU_FW_PATH = "/lib/firmware/am335x-pru1-fw"     # PRU firmware path
+REMOTE_PROC_PATH = "/sys/class/remoteproc/remoteproc2"  # Remoteproc interface for PRU
+
+SERVER_PORT = 6969  # UDP port to receive data (from network)
+CLIENT_PORT = 6970  # UDP port to send data (to clients)
+
+exit_event = threading.Event()
+rx_event = threading.Event()
+
+def netdev_leds(rx_event):
+    """
+    Emulate a network device leds on the uthp
+    """
+    # set path
+    led = "/sys/class/leds/uthp:led2"
+    # set rx and tx emulation
+    while not exit_event.is_set():
+        if rx_event.wait(timeout=1):
+            rx_event.clear()
+            try:
+                with open(led + "/brightness", 'w') as f:
+                    f.write("1")
+                time.sleep(0.05)
+                with open(led + "/brightness", 'w') as f:
+                    f.write("0")
+                time.sleep(0.05)
+            except IOError as e:
+                logging.error("Error writing to LED: %s", e)
+                break
+
+def signal_handler(sig, frame):
+    logging.info("Signal received, exiting...")
+    exit_event.set()
+
+def stop_pru():
+    state_path = os.path.join(REMOTE_PROC_PATH, "state")
+    try:
+        with open(state_path, 'r') as f:
+            state = f.readline().strip()
+        if state != "offline":
+            with open(state_path, 'w') as f:
+                f.write("stop\n")
+        logging.info("PRU stopped.")
+    except IOError as e:
+        logging.error("Error stopping PRU: %s", e)
+        sys.exit(1)
+
+def start_pru():
+    state_path = os.path.join(REMOTE_PROC_PATH, "state")
+    try:
+        with open(state_path, 'w') as f:
+            f.write("start\n")
+        logging.info("PRU started.")
+    except IOError as e:
+        logging.error("Error starting PRU: %s", e)
+        sys.exit(1)
+
+def set_firmware():
+    firmware_path = os.path.join(REMOTE_PROC_PATH, "firmware")
+    try:
+        with open(firmware_path, 'w') as f:
+            f.write(os.path.basename(PRU_FW_PATH) + '\n')
+        logging.info("Firmware set to %s", os.path.basename(PRU_FW_PATH))
+    except IOError as e:
+        logging.error("Error setting firmware: %s", e)
+        sys.exit(1)
+
+def get_interface_ips():
+    """
+    Enumerate all IPv4 interfaces using psutil.
+    Returns a dictionary: {interface_name: ip_address}
+    """
+    interface_ips = {}
+    for iface, addrs in psutil.net_if_addrs().items():
+        for addr in addrs:
+            if addr.family == socket.AF_INET:
+                interface_ips[iface] = addr.address
+    return interface_ips
+
+def read_from_pru(rpmsg_fd, send_sockets):
+    """
+    Read data from the RPMsg device and send it on each interface's send socket.
+    """
+    while not exit_event.is_set():
+        rlist, _, _ = select.select([rpmsg_fd], [], [], 1)
+        if rlist:
+            try:
+                data = os.read(rpmsg_fd, PAYLOAD_LEN)
+                if data:
+                    # set rx flag
+                    rx_event.set()
+                    for iface, sock in send_sockets.items():
+                        local_ip = sock.getsockname()[0]
+                        if local_ip == "127.0.0.1":
+                            dest = ("127.0.0.1", CLIENT_PORT)
+                        else:
+                            dest = ("255.255.255.255", CLIENT_PORT)
+                        sock.sendto(data, dest)
+                        logging.info("Sent from %s (%s) to %s:%d", iface, local_ip, dest[0], dest[1])
+                    logging.info("Received from PRU: %s", data.hex())
+                    logging.info("Timestamp: %s", time.time())
+            except OSError as e:
+                logging.error("Error reading from RPMsg: %s", e)
+                break
+
+def write_to_pru(rpmsg_fd, recv_sockets):
+    """
+    Monitor each interface's receive socket (bound to port 6969) for incoming UDP data.
+    """
+    sock_fds = [sock.fileno() for sock in recv_sockets.values()]
+    while not exit_event.is_set():
+        rlist, _, _ = select.select(sock_fds, [], [], 1)
+        if rlist:
+            for fd in rlist:
+                sock = next((s for s in recv_sockets.values() if s.fileno() == fd), None)
+                if sock:
+                    try:
+                        frame, addr = sock.recvfrom(PAYLOAD_LEN)
+                        logging.info("Received UDP from %s on %s: %s", addr, sock.getsockname()[0], frame.hex())
+                        os.write(rpmsg_fd, frame[:PAYLOAD_LEN])
+                        logging.info("Sent to PRU: %s", frame.hex())
+                        logging.info("Timestamp: %s", time.time())
+                    except OSError as e:
+                        logging.error("Error writing to RPMsg: %s", e)
+                        break
+
+def flush_rpmsg(rpmsg_fd):
+    """
+    Flush any residual data from the RPMsg device.
+    """
+    logging.info("Flushing RPMsg buffer...")
+    flush_start = time.time()
+    is_empty = 0
+    while time.time() - flush_start < 4 or is_empty < 3:
+        try:
+            data = os.read(rpmsg_fd, PAYLOAD_LEN)
+            if data:
+                logging.info("Flushed data: %s", data.hex())
+                is_empty = 0
+            else:
+                is_empty += 1
+                time.sleep(0.1)
+        except OSError as e:
+            if e.errno in (errno.EAGAIN, errno.EWOULDBLOCK):
+                is_empty += 1
+                time.sleep(0.1)
+            else:
+                logging.error("Error during flush: %s", e)
+                break
+    logging.info("RPMsg buffer flushed.")
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Simplified PRU communication using per-interface UDP sockets.")
+    parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose logging")
+    parser.add_argument("-l", "--logfile", type=str, default=None, help="Optional log file path")
+    args = parser.parse_args()
+
+    logging.basicConfig(
+        format="%(asctime)s - %(levelname)s - %(message)s",
+        filename=args.logfile,
+        level=logging.INFO if args.verbose else logging.WARNING
+    )
+    logging.info("Starting PRU communication...")
+
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+
+    interfaces = get_interface_ips()
+    logging.info("Detected interfaces: %s", interfaces)
+
+    #### Interface Enumeration ####
+    recv_sockets = {}
+    send_sockets = {}
+    for iface, ip in interfaces.items():
+        # create receive socket bound to the specific interface IP on SERVER_PORT (6969)
+        try:
+            r_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            r_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            r_sock.bind((ip, SERVER_PORT))
+            r_sock.setblocking(False)
+            recv_sockets[iface] = r_sock
+            logging.info("Receive socket bound on %s (%s) to port %d", iface, ip, SERVER_PORT)
+        except OSError as e:
+            logging.error("Error binding receive socket on %s (%s): %s", iface, ip, e)
+
+        # create send socket bound to the specific interface IP (ephemeral port).
+        try:
+            s_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            if ip != "127.0.0.1":
+                s_sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+            s_sock.bind((ip, 0))  # Use ephemeral port.
+            s_sock.setblocking(False)
+            send_sockets[iface] = s_sock
+            logging.info("Send socket bound on %s (%s) to ephemeral port %d",
+                         iface, ip, s_sock.getsockname()[1])
+        except OSError as e:
+            logging.error("Error binding send socket on %s (%s): %s", iface, ip, e)
+
+    #### PRU firmware and state. ####
+    stop_pru()
+    set_firmware()
+    start_pru()
+
+    time.sleep(1)  # allow time for RPMsg device creation.
+
+    try:
+        rpmsg = open(RPMSG_DEV, 'rb+', buffering=0)
+        logging.info("RPMsg device opened: %s", RPMSG_DEV)
+    except Exception as e:
+        logging.error("Error opening RPMsg device: %s", e)
+        for s in recv_sockets.values():
+            s.close()
+        for s in send_sockets.values():
+            s.close()
+        sys.exit(1)
+
+    rpmsg_fd = rpmsg.fileno()
+    # Set the RPMsg file descriptor to non-blocking mode.
+    flags = fcntl.fcntl(rpmsg_fd, fcntl.F_GETFL)
+    fcntl.fcntl(rpmsg_fd, fcntl.F_SETFL, flags | os.O_NONBLOCK)
+    logging.info("RPMsg fd set to non-blocking mode.")
+
+    try:
+        os.write(rpmsg_fd, b'\x00')
+        logging.info("Dummy frame written to RPMsg.")
+    except OSError:
+        logging.error("Error writing dummy frame to RPMsg.")
+
+    flush_rpmsg(rpmsg_fd)
+
+    # threads for bidirectional communication.
+    read_thread = threading.Thread(target=read_from_pru, args=(rpmsg_fd, send_sockets))
+    write_thread = threading.Thread(target=write_to_pru, args=(rpmsg_fd, recv_sockets))
+    read_thread.start()
+    logging.info("Read thread started.")
+    write_thread.start()
+    logging.info("Write thread started.")
+    # thread for LEDs
+    led_thread = threading.Thread(target=netdev_leds, args=(rx_event,))
+    led_thread.start()
+    logging.info("LED thread started.")
+
+    led_thread.join()
+    logging.info("LED thread joined.")
+    read_thread.join()
+    logging.info("Read thread joined.")
+    write_thread.join()
+    logging.info("Write thread joined.")
+
+    rpmsg.close()
+    for sock in recv_sockets.values():
+        sock.close()
+    for sock in send_sockets.values():
+        sock.close()
+    stop_pru()
+    logging.info("PRU stopped. Exiting.")

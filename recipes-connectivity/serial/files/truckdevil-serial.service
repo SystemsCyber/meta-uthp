@@ -1,0 +1,12 @@
+[Unit]
+Description=TruckDevil Serial Service
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/truck_devil_serial
+Restart=always
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target

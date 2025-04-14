@@ -1,0 +1,15 @@
+# warning: logs should be rotated
+[Unit]
+Description=PLC4UTDuck Service
+After=network.target remoteproc.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/plc4trucksduck_host -v -l /var/log/plc4trucksduck.log
+Restart=on-failure
+Environment=PYTHONUNBUFFERED=1
+User=root
+
+[Install]
+WantedBy=multi-user.target
+

@@ -57,7 +57,8 @@
 // SSCP485 Datasheet recommended waiting about 1.5 characters of line idle to
 // determine that a message had been sent.
 #define CHECKS_TILL_MSG_FINISHED 11 // 13 * 52 µs = 676 µs
-#define PLC // needed in common.h
+#define J1708 // needed in common.h
+// Side note: the SSCP485 doesn't include TP
 
 #include <stdint.h>
 #include <pru_cfg.h>

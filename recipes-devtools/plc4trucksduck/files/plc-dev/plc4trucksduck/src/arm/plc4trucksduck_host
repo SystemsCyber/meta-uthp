@@ -173,19 +173,16 @@ def flush_rpmsg(rpmsg_fd):
     """
     logging.info("Flushing RPMsg buffer...")
     flush_start = time.time()
-    is_empty = 0
-    while time.time() - flush_start < 4 or is_empty < 3:
+    #  4 seconds seems to be a good time to wait for chunked fd data
+    while time.time() - flush_start < 4:
         try:
             data = os.read(rpmsg_fd, PAYLOAD_LEN)
             if data:
                 logging.info("Flushed data: %s", data.hex())
-                is_empty = 0
             else:
-                is_empty += 1
                 time.sleep(0.1)
         except OSError as e:
             if e.errno in (errno.EAGAIN, errno.EWOULDBLOCK):
-                is_empty += 1
                 time.sleep(0.1)
             else:
                 logging.error("Error during flush: %s", e)
